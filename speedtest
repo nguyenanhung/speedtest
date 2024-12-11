@@ -1,0 +1,631 @@
+#!/bin/bash
+# Get the script's filename without path
+directory_name=$(dirname "$0")
+script_name=$(basename "$0")
+# Generate a unique lock file name by combining the directory name and script name,
+# converting them to lowercase, replacing spaces and non-alphanumeric characters with hyphens,
+locked_name="${directory_name}-${script_name}-by-${USER}"
+locked_name=$(echo "$locked_name" | tr '[:upper:]' '[:lower:]') # Convert to lowercase
+locked_name=$(echo "$locked_name" | sed -E 's/[^a-z0-9]+/-/g')  # Replace spaces and non-alphanumeric characters with hyphens
+locked_name=$(echo "$locked_name" | sed -E 's/^-+|-+$//g')      # Remove any extra hyphens at the beginning or end of the string
+mkdir -p /tmp/hungng-locked && chmod 0777 /tmp/hungng-locked
+locked_filename="/tmp/hungng-locked/${locked_name}.lock"
+# Lock the script so that only one instance can run at a time.
+exec 200>"${locked_filename}" || exit 1
+SECONDS=0
+flock -n 200 || exit 1
+trap catch_abort INT
+function catch_abort() {
+  local install_path="/tmp/scripts/speedtest"
+  echo -e "\n** Aborting. Cleaning up files...\n"
+  if [ -f "fio_test" ]; then
+    rm -f fio_test
+  fi
+  if [ -f "test_$$" ]; then
+    rm -f test_$$
+  fi
+  if [ -f "$install_path" ]; then
+    rm -f "$install_path"
+  fi
+  exit 0
+}
+##################################################################################
+#    _    _                     _   _                                            #
+#   | |  | |                   | \ | |                                           #
+#   | |__| |_   _ _ __   __ _  |  \| | __ _ _   _ _   _  ___ _ __                #
+#   |  __  | | | | '_ \ / _` | | . ` |/ _` | | | | | | |/ _ \ '_ \               #
+#   | |  | | |_| | | | | (_| | | |\  | (_| | |_| | |_| |  __/ | | |              #
+#   |_|  |_|\__,_|_| |_|\__, | |_| \_|\__, |\__,_|\__, |\___|_| |_|              #
+#                        __/ |         __/ |       __/ |                         #
+#                       |___/         |___/       |___/                          #
+#--------------------------------------------------------------------------------#
+#                       BEAR Manage Server Script Configure                      #
+# Manage Server by Hung Nguyen - hungna.dev@gmail.com - http://nguyenanhung.com #
+# Any copying without written permission is a violation of copyright policy!     #
+##################################################################################
+export NC='\033[0m'
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export BLUE='\033[0;34m'
+export YELLOW='\033[0;33m'
+export CYAN='\033[0;36m'
+message() {
+  local level
+  level=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+  local message=$2
+  # Color
+  local RSC='\033[0m'
+  local FATAL='\033[1;41m\033[1;33m'  # Nền đỏ - chữ vàng
+  local ERROR='\033[41m\033[1;37m'    # Nền đỏ - Màu trắng đậm
+  local FAILED='\033[0;31m'           # Màu đỏ
+  local INFO='\033[0;92m'             # Màu xanh lá nhạt
+  local DEBUG='\033[0;35m'            # Magenta
+  local TRACE='\033[35m'              # Magenta
+  local EMERGENCY='\033[41;1m'        # Màu nền đỏ đậm nhấp nháy
+  local CRITICAL='\033[41m\033[1;32m' # Xanh lá cây đậm - Nền đỏ
+  local ALERT='\033[1;31m'            # Màu cam đậm
+  local WARNING='\033[0;33m'          # Màu vàng
+  local NOTICE='\033[0;36m'           # Màu xanh dương nhạt
+  local SUCCESS='\033[1;36m'          # Cyan đậm
+  local LINK='\033[1;34m'             # Blue đậm
+  local SUGGEST='\033[38;5;223m'      # Navajo white
+  # Write message
+  case $level in
+  FATAL) echo -e "${level}: ${FATAL}${message}${RSC}" ;;
+  ERROR | ERR) echo -e "${level}: ${ERROR}${message}${RSC}" ;;
+  FAILED) echo -e "${level}: ${FAILED}${message}${RSC}" ;;
+  WARN | WARNING) echo -e "${level}: ${WARNING}${message}${RSC}" ;;
+  INFO) echo -e "${level}: ${INFO}${message}${RSC}" ;;
+  SUCCESS | FINISHED) echo -e "${level}: ${SUCCESS}${message}${RSC}" ;;
+  LINK | URL) echo -e "${level}: ${LINK}${message}${RSC}" ;;
+  DEBUG) echo -e "${level}: ${DEBUG}${message}${RSC}" ;;
+  TRACE | CURRENT) echo -e "${level}: ${TRACE}${message}${RSC}" ;;
+  EMERGENCY) echo -e "${level}: ${EMERGENCY}${message}${RSC}" ;;
+  ALERT) echo -e "${level}: ${ALERT}${message}${RSC}" ;;
+  CRITICAL) echo -e "${level}: ${CRITICAL}${message}${RSC}" ;;
+  NOTICE | NOTE) echo -e "${level}: ${NOTICE}${message}${RSC}" ;;
+  SUGGEST) echo -e "${level}: ${SUGGEST}${message}${RSC}" ;;
+  *) echo -e "${message}" ;;
+  esac
+}
+required_root_privileges() {
+  if [[ $EUID -ne 0 ]]; then
+    echo -e "EMERGENCY: ${RED}This script must be run as root. Please switch to root user or use sudo.${NC}"
+    exit 1
+  fi
+}
+required_root_privileges
+# Detect the operating system type using uname
+os_name() {
+  local os_type uname_out
+
+  uname_out=$(uname -s)
+
+  case "$uname_out" in
+  Linux*)
+    if [[ -f /etc/redhat-release ]]; then
+      os_type="rhel"
+    elif [[ -f /etc/debian_version ]]; then
+      os_type="debian"
+    else
+      os_type="linux"
+    fi
+    ;;
+  Darwin*)
+    os_type="macos"
+    ;;
+  *)
+    os_type="unknown"
+    ;;
+  esac
+
+  # Return or export the OS type
+  echo "$os_type"
+}
+ipv6_is_supported() {
+  local LOCAL_CURL IP_CHECK_CMD
+  if command -v curl &>/dev/null; then
+    LOCAL_CURL="true"
+  else
+    unset LOCAL_CURL
+  fi
+  if [ -n "$LOCAL_CURL" ]; then
+    IP_CHECK_CMD="curl -s -m 4"
+  else
+    IP_CHECK_CMD="wget -qO- -T 4"
+  fi
+  local IPV6_CHECK
+  IPV6_CHECK=$( (ping -6 -c 1 -W 4 ipv6.google.com >/dev/null 2>&1 && echo true) || $IP_CHECK_CMD -6 icanhazip.com 2>/dev/null)
+  if [[ -z "$IPV6_CHECK" ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+fetch_public_ip() {
+  local CHECK_URL IP
+  for CHECK_URL in "https://checkip.amazonaws.com/" "https://icanhazip.com/" "https://whatismyip.akamai.com/" "https://api.ipify.org/" "https://cpanel.net/showip.cgi" "https://myip.directadmin.com/" "https://ipinfo.io/ip"; do
+    IP=$(curl -s --max-time 1 "${CHECK_URL}") && [ -n "${IP}" ] && echo "${IP}" && return 0
+  done
+  return 1
+}
+fetch_public_ipv6() {
+  if ipv6_is_supported; then
+    local CHECK_URL IP
+    for CHECK_URL in "https://ipv6.whatismyip.akamai.com/" "https://api6.ipify.org" "https://6.ident.me" "https://v6.ipv6-test.com/api/myip.php" "https://ipv6.seeip.org/" "https://ip.nguyenanhung.com/ip"; do
+      IP=$(curl -s --max-time 1 "${CHECK_URL}") && [ -n "${IP}" ] && echo "${IP}" && return 0
+    done
+    return 1
+  fi
+  return 1
+}
+# Example usage
+detected_os=$(os_name)
+server_os_compatibility=$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2- | tr -d '"')
+os_compatibility="${server_os_compatibility^^}"
+message INFO "Detected OS: ${detected_os^^} - Compatible with: ${os_compatibility}"
+
+# install wget, fio and virt-what
+if [ ! -e '/usr/bin/wget' ] || [ ! -e '/usr/bin/fio' ] || [ ! -e '/usr/sbin/virt-what' ]; then
+  message INFO "Please wait..."
+  if [[ "$detected_os" == "debian" ]]; then
+    apt update
+    apt install -y wget fio virt-what >/dev/null 2>&1
+  elif [[ "$detected_os" == "rhel" ]]; then
+    dnf update
+    dnf install -y wget fio virt-what >/dev/null 2>&1
+  else
+    message INFO "OS Unsupported!"
+    exit 1
+  fi
+fi
+
+virtual_machine=$(virt-what | paste -sd' ')
+
+if [[ ${virtual_machine} ]]; then
+  virt="$virtual_machine"
+else
+  virt="No Virtual Detector"
+fi
+
+get_operating_system() {
+  [ -f /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
+  [ -f /etc/os-release ] && awk -F'[= "]' '/PRETTY_NAME/{print $3,$4,$5}' /etc/os-release && return
+  [ -f /etc/lsb-release ] && awk -F'[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
+}
+next() {
+  printf "%-90s\n" "-" | sed 's/\s/-/g'
+}
+speed_test() {
+  local speedtest ipaddress nodeName
+  speedtest=$(wget -4O /dev/null -T300 "$1" 2>&1 | awk '/\/dev\/null/ {speed=$3 $4} END {gsub(/\(|\)/,"",speed); print speed}')
+  ipaddress=$(ping -c1 -4 -n "$(echo "$1" | sed -E 's#https?://([^:/]+).*#\1#')" | awk -F'[()]' '{print $2;exit}')
+  nodeName=$2
+  printf "${YELLOW}%-40s${GREEN}%-20s${RED}%-14s${NC}\n" "${nodeName}" "${ipaddress}" "${speedtest}"
+}
+speed_test_v6() {
+  local speedtest ipaddress nodeName
+  speedtest=$(wget -6O /dev/null -T300 "$1" 2>&1 | awk '/\/dev\/null/ {speed=$3 $4} END {gsub(/\(|\)/,"",speed); print speed}')
+  ipaddress=$(ping6 -c1 -n "$(echo "$1" | sed -E 's#https?://([^:/]+).*#\1#')" | awk -F'[()]' '{print $2;exit}')
+  nodeName=$2
+  printf "${YELLOW}%-40s${GREEN}%-40s${RED}%-14s${NC}\n" "${nodeName}" "${ipaddress}" "${speedtest}"
+}
+speed_of_bear_selected_server_test() {
+  speed_test 'http://speedtest.hkg12.hk.leaseweb.net/100mb.bin' 'Leaseweb, Hong Kong DC2, HK'
+  speed_test 'http://speedtest.sin1.sg.leaseweb.net/100mb.bin' 'Leaseweb, SGP DC 1, Singapore'
+  speed_test 'http://speedtest.tyo11.jp.leaseweb.net/100mb.bin' 'Leaseweb, Tokyo, Japan'
+  speed_test 'http://speedtest.syd12.au.leaseweb.net/100mb.bin' 'Leaseweb, Sydney, Australia'
+  speed_test 'http://sgp.download.datapacket.com/100mb.bin' 'GreenCloudVPS, SGP DC 1, Singapore'
+  speed_test 'https://hnd-jp-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Tokyo, Japan'
+  speed_test 'https://syd-au-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Sydney, Australia'
+  speed_test 'https://lg.icn.psychz.net/200MB.test' 'Psychz Network, Seoul, South Korea'
+  speed_test 'https://lg.tw.psychz.net/200MB.test' 'Psychz Network, Taipei, Taiwan'
+  speed_test 'https://lg.hcm.greencloudvps.com/100MB.test' 'GreenCloudVPS, Ho Chi Minh, VN'
+  speed_test 'https://lg.hn.greencloudvps.com/100MB.test' 'GreenCloudVPS, Ha Noi, VN'
+  speed_test 'https://lax-ca-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Los Angeles, USA'
+  speed_test 'https://wa-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Seattle, USA'
+  speed_test 'https://tx-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Dallas, USA'
+  speed_test 'https://lg.sjc.greencloudvps.com/100MB.test' 'GreenCloudVPS, San Jose, USA'
+  speed_test 'https://lg.az.greencloudvps.com/100MB.test' 'GreenCloudVPS, Phoenix, USA'
+  speed_test 'https://lg.il2.greencloudvps.com/100MB.test' 'GreenCloudVPS, Chicago DC2, USA'
+  speed_test 'https://lg.ga.greencloudvps.com/100MB.test' 'GreenCloudVPS, Atlanta, USA'
+  speed_test 'https://lg.mo.greencloudvps.com/100MB.test' 'GreenCloudVPS, Kansas City, USA'
+  speed_test 'https://tor-ca-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Toronto, Canada'
+  speed_test 'https://lg.nl.greencloudvps.com/100MB.test' 'GreenCloudVPS, Amsterdam, NL/EU'
+  speed_test 'https://lg.de.greencloudvps.com/100MB.test' 'GreenCloudVPS, Frankfurt, DE/EU'
+  speed_test 'https://lon-gb-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, London, UK'
+  speed_test 'https://par-fr-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Paris, France'
+}
+speed_ipv6_of_bear_selected_server_test() {
+  speed_test_v6 'http://speedtest.sin1.sg.leaseweb.net/100mb.bin' 'Leaseweb, SGP DC1, Singapore'
+  speed_test_v6 'http://speedtest.hkg12.hk.leaseweb.net/100mb.bin' 'Leaseweb, Hong Kong, HK'
+  speed_test_v6 'http://speedtest.sin1.sg.leaseweb.net/100mb.bin' 'Leaseweb, SGP DC1, Singapore'
+  speed_test_v6 'http://speedtest.tyo11.jp.leaseweb.net/100mb.bin' 'Leaseweb, Tokyo, Japan'
+  speed_test_v6 'http://speedtest.syd12.au.leaseweb.net/100mb.bin' 'Leaseweb, Sydney, Australia'
+  speed_test_v6 'http://speedtest.lax12.us.leaseweb.net/100mb.bin' 'Leaseweb, Los Angeles, United States'
+  speed_test_v6 'http://speedtest.wdc2.us.leaseweb.net/100mb.bin' 'Leaseweb, Washington, United States'
+  speed_test_v6 'http://speedtest.sfo12.us.leaseweb.net/100mb.bin' 'Leaseweb, San Francisco, United States'
+  speed_test_v6 'http://speedtest.sea11.us.leaseweb.net/100mb.bin' 'Leaseweb, Seattle, United States'
+  speed_test_v6 'http://speedtest.mia11.us.leaseweb.net/100mb.bin' 'Leaseweb, Miami, United States'
+  speed_test_v6 'http://speedtest.phx1.us.leaseweb.net/100mb.bin' 'Leaseweb, Phoenix, United States'
+  speed_test_v6 'http://speedtest.dal13.us.leaseweb.net/100mb.bin' 'Leaseweb, Dallas, United States'
+  speed_test_v6 'http://speedtest.nyc1.us.leaseweb.net/100mb.bin' 'Leaseweb, New York, United States'
+  speed_test_v6 'http://speedtest.chi11.us.leaseweb.net/100mb.bin' 'Leaseweb, Chicago, United States'
+  speed_test_v6 'http://speedtest.mtl2.ca.leaseweb.net/100mb.bin' 'Leaseweb, Montreal, Canada'
+  speed_test_v6 'http://speedtest.ams1.nl.leaseweb.net/100mb.bin' 'Leaseweb, Amsterdam DC1, Netherlands'
+  speed_test_v6 'http://speedtest.ams2.nl.leaseweb.net/100mb.bin' 'Leaseweb, Amsterdam DC2, Netherlands'
+  speed_test_v6 'http://speedtest.fra1.de.leaseweb.net/100mb.bin' 'Leaseweb, Frankfurt, Germany'
+  speed_test_v6 'http://speedtest.lon1.uk.leaseweb.net/100mb.bin' 'Leaseweb, London DC1, United Kingdom'
+  speed_test_v6 'http://speedtest.lon12.uk.leaseweb.net/100mb.bin' 'Leaseweb, London DC2, United Kingdom'
+}
+speed_of_leaseweb_test() {
+  speed_test 'http://speedtest.sin1.sg.leaseweb.net/100mb.bin' 'Leaseweb, SIN-01, Singapore'
+  speed_test 'http://speedtest.syd12.au.leaseweb.net/100mb.bin' 'Leaseweb, SYD-12, Australia'
+  speed_test 'http://speedtest.hkg12.hk.leaseweb.net/100mb.bin' 'Leaseweb, HGK-12, Hong Kong'
+  speed_test 'http://speedtest.tyo11.jp.leaseweb.net/100mb.bin' 'Leaseweb, TYO-11, Tokyo, Japan'
+  speed_test 'http://speedtest.lax12.us.leaseweb.net/100mb.bin' 'Leaseweb, LAX-12, United States'
+  speed_test 'http://speedtest.wdc2.us.leaseweb.net/100mb.bin' 'Leaseweb, WDC-02, United States'
+  speed_test 'http://speedtest.sfo12.us.leaseweb.net/100mb.bin' 'Leaseweb, SFO-12, United States'
+  speed_test 'http://speedtest.sea11.us.leaseweb.net/100mb.bin' 'Leaseweb, SEA-11, United States'
+  speed_test 'http://speedtest.mia11.us.leaseweb.net/100mb.bin' 'Leaseweb, MIA-11, United States'
+  speed_test 'http://speedtest.phx1.us.leaseweb.net/100mb.bin' 'Leaseweb, PHX-01, United States'
+  speed_test 'http://speedtest.dal13.us.leaseweb.net/100mb.bin' 'Leaseweb, DAL-13, United States'
+  speed_test 'http://speedtest.nyc1.us.leaseweb.net/100mb.bin' 'Leaseweb, NYC-01, United States'
+  speed_test 'http://speedtest.chi11.us.leaseweb.net/100mb.bin' 'Leaseweb, CHI-11, United States'
+  speed_test 'http://speedtest.mtl2.ca.leaseweb.net/100mb.bin' 'Leaseweb, MTL-02, Canada'
+  speed_test 'http://speedtest.ams1.nl.leaseweb.net/100mb.bin' 'Leaseweb, AMS-01, Netherlands'
+  speed_test 'http://speedtest.ams2.nl.leaseweb.net/100mb.bin' 'Leaseweb, AMS-02, Netherlands'
+  speed_test 'http://speedtest.fra1.de.leaseweb.net/100mb.bin' 'Leaseweb, FRA-01, Germany'
+  speed_test 'http://speedtest.lon1.uk.leaseweb.net/100mb.bin' 'Leaseweb, LON-01, United Kingdom'
+  speed_test 'http://speedtest.lon12.uk.leaseweb.net/100mb.bin' 'Leaseweb, LON-12, United Kingdom'
+}
+speed_ipv6_of_leaseweb_test() {
+  speed_test_v6 'http://speedtest.sin1.sg.leaseweb.net/100mb.bin' 'Leaseweb, SGP DC1, Singapore'
+  speed_test_v6 'http://speedtest.syd12.au.leaseweb.net/100mb.bin' 'Leaseweb, Sydney, Australia'
+  speed_test_v6 'http://speedtest.hkg12.hk.leaseweb.net/100mb.bin' 'Leaseweb, Hong Kong'
+  speed_test_v6 'http://speedtest.tyo11.jp.leaseweb.net/100mb.bin' 'Leaseweb, Tokyo, Japan'
+  speed_test_v6 'http://speedtest.lax12.us.leaseweb.net/100mb.bin' 'Leaseweb, Los Angeles, United States'
+  speed_test_v6 'http://speedtest.wdc2.us.leaseweb.net/100mb.bin' 'Leaseweb, Washington, United States'
+  speed_test_v6 'http://speedtest.sfo12.us.leaseweb.net/100mb.bin' 'Leaseweb, San Francisco, United States'
+  speed_test_v6 'http://speedtest.sea11.us.leaseweb.net/100mb.bin' 'Leaseweb, Seattle, United States'
+  speed_test_v6 'http://speedtest.mia11.us.leaseweb.net/100mb.bin' 'Leaseweb, Miami, United States'
+  speed_test_v6 'http://speedtest.phx1.us.leaseweb.net/100mb.bin' 'Leaseweb, Phoenix, United States'
+  speed_test_v6 'http://speedtest.dal13.us.leaseweb.net/100mb.bin' 'Leaseweb, Dallas, United States'
+  speed_test_v6 'http://speedtest.nyc1.us.leaseweb.net/100mb.bin' 'Leaseweb, New York, United States'
+  speed_test_v6 'http://speedtest.chi11.us.leaseweb.net/100mb.bin' 'Leaseweb, Chicago, United States'
+  speed_test_v6 'http://speedtest.mtl2.ca.leaseweb.net/100mb.bin' 'Leaseweb, Montreal, Canada'
+  speed_test_v6 'http://speedtest.ams1.nl.leaseweb.net/100mb.bin' 'Leaseweb, Amsterdam DC1, Netherlands'
+  speed_test_v6 'http://speedtest.ams2.nl.leaseweb.net/100mb.bin' 'Leaseweb, Amsterdam DC2, Netherlands'
+  speed_test_v6 'http://speedtest.fra1.de.leaseweb.net/100mb.bin' 'Leaseweb, Frankfurt, Germany'
+  speed_test_v6 'http://speedtest.lon1.uk.leaseweb.net/100mb.bin' 'Leaseweb, London DC1, United Kingdom'
+  speed_test_v6 'http://speedtest.lon12.uk.leaseweb.net/100mb.bin' 'Leaseweb, London DC2, United Kingdom'
+}
+speed_of_hosthatch_test() {
+  # Linode
+  speed_test 'http://lg.hkg.hosthatch.com/1GB.test' 'HostHatch, Hong Kong, APAC'
+  speed_test 'http://lg.sgp.hosthatch.com/1GB.test' 'HostHatch, Singapore, APAC'
+  speed_test 'http://lg.tok.hosthatch.com/1GB.test' 'HostHatch, Tokyo, APAC'
+  speed_test 'http://lg.syd.hosthatch.com/1GB.test' 'HostHatch, Sydney, APAC'
+  speed_test 'http://lg.chi.hosthatch.com/1GB.test' 'HostHatch, Chicago, USA'
+  speed_test 'http://lg.lon.hosthatch.com/1GB.test' 'HostHatch, London, FR'
+  speed_test 'http://lg.lax.hosthatch.com/1GB.test' 'HostHatch, Los Angeles, USA'
+  speed_test 'http://lg.ny.hosthatch.com/1GB.test' 'HostHatch, New York, USA'
+  speed_test 'http://lg.ams.hosthatch.com/1GB.test' 'HostHatch, Amsterdam, EU'
+  speed_test 'http://lg.osl.hosthatch.com/1GB.test' 'HostHatch, Oslo, EU'
+  speed_test 'http://lg.sto.hosthatch.com/1GB.test' 'HostHatch, Stockholm, EU'
+  speed_test 'http://lg.vie.hosthatch.com/1GB.test' 'HostHatch, Vienna, EU'
+  speed_test 'http://lg.zrh.hosthatch.com/1GB.test' 'HostHatch, Zurich, EU'
+}
+speed_ipv6_of_hosthatch_test() {
+  speed_test_v6 'http://lg.hkg.hosthatch.com/1GB.test' 'HostHatch, Hong Kong, APAC'
+  speed_test_v6 'http://lg.sgp.hosthatch.com/1GB.test' 'HostHatch, Singapore, APAC'
+  speed_test_v6 'http://lg.tok.hosthatch.com/1GB.test' 'HostHatch, Tokyo, APAC'
+  speed_test_v6 'http://lg.syd.hosthatch.com/1GB.test' 'HostHatch, Sydney, APAC'
+  speed_test_v6 'http://lg.chi.hosthatch.com/1GB.test' 'HostHatch, Chicago, USA'
+  speed_test_v6 'http://lg.lon.hosthatch.com/1GB.test' 'HostHatch, London, FR'
+  speed_test_v6 'http://lg.lax.hosthatch.com/1GB.test' 'HostHatch, Los Angeles, USA'
+  speed_test_v6 'http://lg.ny.hosthatch.com/1GB.test' 'HostHatch, New York, USA'
+  speed_test_v6 'http://lg.ams.hosthatch.com/1GB.test' 'HostHatch, Amsterdam, EU'
+  speed_test_v6 'http://lg.osl.hosthatch.com/1GB.test' 'HostHatch, Oslo, EU'
+  speed_test_v6 'http://lg.sto.hosthatch.com/1GB.test' 'HostHatch, Stockholm, EU'
+  speed_test_v6 'http://lg.vie.hosthatch.com/1GB.test' 'HostHatch, Vienna, EU'
+  speed_test_v6 'http://lg.zrh.hosthatch.com/1GB.test' 'HostHatch, Zurich, EU'
+}
+speed_of_linode_test() {
+  # Linode
+  speed_test 'http://speedtest.singapore.linode.com/100MB-singapore.bin' 'Linode, Singapore DC1'
+  speed_test 'https://sg-sin-2.speedtest.linode.com/100MB-singapore.bin' 'Linode, Singapore DC2'
+  speed_test 'https://jp-tyo-3.speedtest.linode.com/100MB-tokyo.bin' 'Linode, Tokyo, Japan'
+  speed_test 'http://speedtest.osaka.linode.com/100MB-osaka.bin' 'Linode, Osaka, Japan'
+  speed_test 'http://speedtest.sydney.linode.com/100MB-sydney.bin' 'Linode, Sydney, Australia'
+  speed_test 'http://speedtest.los-angeles.linode.com/100MB-los-angeles.bin' 'Linode, Los Angeles, CA, USA'
+  speed_test 'http://speedtest.atlanta.linode.com/100MB-atlanta.bin' 'Linode, Atlanta, GA, USA'
+  speed_test 'http://speedtest.dallas.linode.com/100MB-dallas.binn' 'Linode, Dallas, TX, USA'
+  speed_test 'http://speedtest.fremont.linode.com/100MB-fremont.bin' 'Linode, Fremont, CA, USA'
+  speed_test 'http://speedtest.newark.linode.com/100MB-newark.bin' 'Linode, Newark, NJ, USA'
+  speed_test 'http://speedtest.toronto.linode.com/100MB-toronto.bin' 'Linode, Toronto, ON, Canada'
+  speed_test 'http://speedtest.frankfurt.linode.com/100MB-frankfurt.bin' 'Linode, Frankfurt, Germany'
+  speed_test 'http://speedtest.london.linode.com/100MB-london.bin' 'Linode, London, UK'
+}
+speed_ipv6_of_linode_test() {
+  speed_test_v6 'http://speedtest.singapore.linode.com/100MB-singapore.bin' 'Linode, Singapore DC1'
+  speed_test_v6 'https://sg-sin-2.speedtest.linode.com/100MB-singapore.bin' 'Linode, Singapore DC2'
+  speed_test_v6 'https://jp-tyo-3.speedtest.linode.com/100MB-tokyo.bin' 'Linode, Tokyo, Japan'
+  speed_test_v6 'http://speedtest.osaka.linode.com/100MB-osaka.bin' 'Linode, Osaka, Japan'
+  speed_test_v6 'http://speedtest.sydney.linode.com/100MB-sydney.bin' 'Linode, Sydney, Australia'
+  speed_test_v6 'http://speedtest.los-angeles.linode.com/100MB-los-angeles.bin' 'Linode, Los Angeles, CA, USA'
+  speed_test_v6 'http://speedtest.atlanta.linode.com/100MB-atlanta.bin' 'Linode, Atlanta, GA, USA'
+  speed_test_v6 'http://speedtest.dallas.linode.com/100MB-dallas.binn' 'Linode, Dallas, TX, USA'
+  speed_test_v6 'http://speedtest.fremont.linode.com/100MB-fremont.bin' 'Linode, Fremont, CA, USA'
+  speed_test_v6 'http://speedtest.newark.linode.com/100MB-newark.bin' 'Linode, Newark, NJ, USA'
+  speed_test_v6 'http://speedtest.toronto.linode.com/100MB-toronto.bin' 'Linode, Toronto, ON, Canada'
+  speed_test_v6 'http://speedtest.frankfurt.linode.com/100MB-frankfurt.bin' 'Linode, Frankfurt, Germany'
+  speed_test_v6 'http://speedtest.london.linode.com/100MB-london.bin' 'Linode, London, UK'
+}
+speed_of_vultr_test() {
+  # Vultr Speed Test
+  speed_test 'https://il-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Chicago, USA'
+  speed_test 'https://tx-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Dallas, USA'
+  speed_test 'https://ga-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Atlanta, USA'
+  speed_test 'https://lax-ca-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Los Angeles, USA'
+  speed_test 'https://wa-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Seattle, USA'
+  speed_test 'https://fl-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Miami, USA'
+  speed_test 'https://ams-nl-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Amsterdam, Netherlands'
+  speed_test 'https://lon-gb-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, London, UK'
+  speed_test 'https://par-fr-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Paris, France'
+  speed_test 'https://fra-de-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Frankfurt, Germany'
+  speed_test 'https://sgp-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Singapore'
+  speed_test 'https://hnd-jp-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Tokyo, Japan'
+  speed_test 'https://syd-au-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Sydney, Australia'
+  speed_test 'https://tor-ca-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Toronto, Canada'
+}
+speed_ipv6_of_vultr_test() {
+  speed_test_v6 'https://il-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Chicago, USA'
+  speed_test_v6 'https://tx-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Dallas, USA'
+  speed_test_v6 'https://ga-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Atlanta, USA'
+  speed_test_v6 'https://lax-ca-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Los Angeles, USA'
+  speed_test_v6 'https://wa-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Seattle, USA'
+  speed_test_v6 'https://fl-us-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Miami, USA'
+  speed_test_v6 'https://ams-nl-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Amsterdam, Netherlands'
+  speed_test_v6 'https://lon-gb-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, London, UK'
+  speed_test_v6 'https://par-fr-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Paris, France'
+  speed_test_v6 'https://fra-de-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Frankfurt, Germany'
+  speed_test_v6 'https://sgp-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Singapore'
+  speed_test_v6 'https://hnd-jp-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Tokyo, Japan'
+  speed_test_v6 'https://syd-au-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Sydney, Australia'
+  speed_test_v6 'https://tor-ca-ping.vultr.com/vultr.com.100MB.bin' 'Vultr, Toronto, Canada'
+}
+speed_of_racknerd_test() {
+  speed_test 'https://lg-lax02.racknerd.com/test_files/100MB.test' 'RackNerd, Los Angeles, CA, USA'
+  speed_test 'https://lg-sj.racknerd.com/test_files/100MB.test' 'RackNerd, San Jose, CA, USA'
+  speed_test 'https://lg-sea.racknerd.com/test_files/100MB.test' 'RackNerd, Seattle, WA, USA'
+  speed_test 'https://lg-dal.racknerd.com/test_files/100MB.test' 'RackNerd, Dallas, TX, USA'
+  speed_test 'https://lg-chi.racknerd.com/test_files/100MB.test' 'RackNerd, Chicago, IL, USA'
+  speed_test 'https://lg-ny.racknerd.com/test_files/100MB.test' 'RackNerd, New York, USA'
+  speed_test 'https://lg-ash.racknerd.com/test_files/100MB.test' 'RackNerd, Ashburn, VA, USA'
+  speed_test 'https://lg-atl.racknerd.com/test_files/100MB.test' 'RackNerd, Atlanta, GA, USA'
+  speed_test 'https://lg-fr.racknerd.com/test_files/100MB.test' 'RackNerd, Strasbourg, FR, Europe'
+  speed_test 'https://lg-ams.racknerd.com/test_files/100MB.test' 'RackNerd, Amsterdam, NL, Europe'
+  speed_test 'https://lg-dub.racknerd.com/test_files/100MB.test' 'RackNerd, Dublin, IE, Europe'
+}
+speed_ipv6_of_racknerd_test() {
+  speed_test_v6 'https://lg-lax02.racknerd.com/test_files/100MB.test' 'RackNerd, Los Angeles, CA, USA'
+  speed_test_v6 'https://lg-sj.racknerd.com/test_files/100MB.test' 'RackNerd, San Jose, CA, USA'
+  speed_test_v6 'https://lg-sea.racknerd.com/test_files/100MB.test' 'RackNerd, Seattle, WA, USA'
+  speed_test_v6 'https://lg-dal.racknerd.com/test_files/100MB.test' 'RackNerd, Dallas, TX, USA'
+  speed_test_v6 'https://lg-chi.racknerd.com/test_files/100MB.test' 'RackNerd, Chicago, IL, USA'
+  speed_test_v6 'https://lg-ny.racknerd.com/test_files/100MB.test' 'RackNerd, New York, USA'
+  speed_test_v6 'https://lg-ash.racknerd.com/test_files/100MB.test' 'RackNerd, Ashburn, VA, USA'
+  speed_test_v6 'https://lg-atl.racknerd.com/test_files/100MB.test' 'RackNerd, Atlanta, GA, USA'
+  speed_test_v6 'https://lg-fr.racknerd.com/test_files/100MB.test' 'RackNerd, Strasbourg, FR, Europe'
+  speed_test_v6 'https://lg-ams.racknerd.com/test_files/100MB.test' 'RackNerd, Amsterdam, NL, Europe'
+  speed_test_v6 'https://lg-dub.racknerd.com/test_files/100MB.test' 'RackNerd, Dublin, IE, Europe'
+}
+speed_of_vietnam_telco_test() {
+  speed_test 'http://speedtest1.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Ha Noi, VN'
+  speed_test 'http://speedtest3.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Ho Chi Minh, VN'
+  speed_test 'http://speedtest5.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Da Nang, VN'
+  speed_test 'http://speedtest7.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Hai Phong, VN'
+  speed_test 'http://speedtestkv1a.viettel.vn/speedtest/random4000x4000.jpg' 'Viettel Network, Ha Noi, VN'
+  speed_test 'http://speedtestkv2a.viettel.vn/speedtest/random4000x4000.jpg' 'Viettel Network, Da Nang, VN'
+  speed_test 'https://speedtestkv3b.viettel.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'Viettel Network, Ho Chi Minh, VN'
+  speed_test 'https://speedtesthn.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ha Noi, VN'
+  speed_test 'https://speedtestdng.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Da Nang, VN'
+  speed_test 'https://speedtest.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ho Chi Minh, VN'
+  speed_test 'https://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
+  speed_test 'https://hcmspeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ho Chi Minh, VN'
+  speed_test 'https://speedtest.vpsttt.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VPSTTT, Ha Noi, VN'
+  speed_test 'https://hn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ha Noi, VN'
+  speed_test 'https://dn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Da Nang, VN'
+  speed_test 'https://sg1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ho Chi Minh, VN'
+  speed_test 'https://speedtest.vtconline.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VTC Online, Ha Noi, VN'
+  speed_test 'https://speedtest.vitechcheap.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VitechCheap, Ha Noi, VN'
+  speed_test 'https://vhn.vietpn.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VietPN, Ha Noi, VN'
+  speed_test 'https://vhcm.vietpn.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VietPN, Ho Chi Minh, VN'
+}
+speed_ipv6_of_vietnam_telco_test() {
+  speed_test_v6 'http://speedtest1.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Ha Noi, VN'
+  speed_test_v6 'http://speedtest3.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Ho Chi Minh, VN'
+  speed_test_v6 'http://speedtest5.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Da Nang, VN'
+  speed_test_v6 'http://speedtest7.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Hai Phong, VN'
+  speed_test_v6 'http://speedtestkv1a.viettel.vn/speedtest/random4000x4000.jpg' 'Viettel Network, Ha Noi, VN'
+  speed_test_v6 'http://speedtestkv2a.viettel.vn/speedtest/random4000x4000.jpg' 'Viettel Network, Da Nang, VN'
+  speed_test_v6 'https://speedtestkv3b.viettel.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'Viettel Network, Ho Chi Minh, VN'
+  speed_test_v6 'https://speedtesthn.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ha Noi, VN'
+  speed_test_v6 'https://speedtestdng.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Da Nang, VN'
+  speed_test_v6 'https://speedtest.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ho Chi Minh, VN'
+  speed_test_v6 'https://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
+  speed_test_v6 'https://hcmspeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ho Chi Minh, VN'
+  speed_test_v6 'https://hn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ha Noi, VN'
+  speed_test_v6 'https://dn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Da Nang, VN'
+  speed_test_v6 'https://sg1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ho Chi Minh, VN'
+}
+speed_of_vietnam_telco_2_test() {
+  speed_test 'http://speedtest.bizflycloud.vn/files/100MB.testfile' 'BizFly Cloud, VN'
+  speed_test 'http://speedtest-vccloud.cdn.vccloud.vn/files/100MB.testfile' 'BizFly CDN, VN'
+  #  speed_test 'https://lg-vn1.vhost.vn/100MB.test' 'vHost.vn - CMC, Ho Chi Minh, VN'
+  #  speed_test 'https://lg-vn2.vhost.vn/100MB.test' 'vHost.vn - Viettel IDC, Ho Chi Minh, VN'
+  #  speed_test 'https://lg-vn3.vhost.vn/100MB.test' 'vHost.vn - Viettel IDC, Ha Noi, VN'
+  #  speed_test 'https://lg-vn4.vhost.vn/100MB.test' 'vHost.vn - FPT, Ho Chi Minh, VN'
+  #  speed_test 'https://lg-vn5.vhost.vn/100MB.test' 'vHost.vn - VNPT, Ho Chi Minh, VN'
+  #  speed_test 'http://speedtest-vdc2.123host.vn/100MB.test' '123Host - VDC2, Ho Chi Minh, VN'
+}
+speed_of_cachefly_test() {
+  speed_test 'http://cachefly.cachefly.net/100mb.test' 'CacheFly, Global CDN'
+}
+speed() {
+  speed_of_cachefly_test
+  speed_of_vietnam_telco_test
+  speed_of_vietnam_telco_2_test
+  speed_of_bear_selected_server_test
+}
+speed_ipv6() {
+  speed_ipv6_of_vietnam_telco_test
+  speed_ipv6_of_bear_selected_server_test
+}
+io_test() {
+  (LANG=C dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//'
+}
+dd_test() {
+  local io1 io2 io3 ioraw1 ioraw2 ioraw3 ioall ioavg
+  message INFO "dd Test"
+  io1=$(io_test)
+  message INFO "I/O (1st run)        : ${YELLOW}$io1${NC}"
+  io2=$(io_test)
+  message INFO "I/O (2nd run)        : ${YELLOW}$io2${NC}"
+  io3=$(io_test)
+  message INFO "I/O (3rd run)        : ${YELLOW}$io3${NC}"
+  ioraw1=$(echo "$io1" | awk 'NR==1 {print $1}')
+  [ "$(echo "$io1" | awk 'NR==1 {print $2}')" == "GB/s" ] && ioraw1=$(awk 'BEGIN{print '"$ioraw1"' * 1024}')
+  ioraw2=$(echo "$io2" | awk 'NR==1 {print $1}')
+  [ "$(echo "$io2" | awk 'NR==1 {print $2}')" == "GB/s" ] && ioraw2=$(awk 'BEGIN{print '"$ioraw2"' * 1024}')
+  ioraw3=$(echo "$io3" | awk 'NR==1 {print $1}')
+  [ "$(echo "$io3" | awk 'NR==1 {print $2}')" == "GB/s" ] && ioraw3=$(awk 'BEGIN{print '"$ioraw3"' * 1024}')
+  ioall=$(awk 'BEGIN{print '"$ioraw1"' + '"$ioraw2"' + '"$ioraw3"'}')
+  ioavg=$(awk 'BEGIN{printf "%.1f", '"$ioall"' / 3}')
+  message INFO "Average              : ${YELLOW}$ioavg${NC} MB/s"
+}
+fio_test() {
+  if [ -e '/usr/bin/fio' ]; then
+    message INFO "Fio Test"
+    local tmp
+    tmp=$(mktemp)
+    fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=fio_test --filename=fio_test --bs=4k --numjobs=1 --iodepth=64 --size=256M --readwrite=randrw --rwmixread=75 --runtime=30 --time_based --output="$tmp"
+    local iops_read iops_write bw_read bw_write
+
+    if [ "$(fio -v | cut -d '.' -f 1)" == "fio-2" ]; then
+      iops_read=$(grep "iops=" "$tmp" | grep read | awk -F[=,]+ '{print $6}')
+      iops_write=$(grep "iops=" "$tmp" | grep write | awk -F[=,]+ '{print $6}')
+      bw_read=$(grep "bw=" "$tmp" | grep read | awk -F[=,B]+ '{if(match($4, /[0-9]+K$/)) {printf("%.1f", int($4)/1024);} else if(match($4, /[0-9]+M$/)) {printf("%.1f", substr($4, 0, length($4)-1))} else {printf("%.1f", int($4)/1024/1024);}}')"MB/s"
+      bw_write=$(grep "bw=" "$tmp" | grep write | awk -F[=,B]+ '{if(match($4, /[0-9]+K$/)) {printf("%.1f", int($4)/1024);} else if(match($4, /[0-9]+M$/)) {printf("%.1f", substr($4, 0, length($4)-1))} else {printf("%.1f", int($4)/1024/1024);}}')"MB/s"
+
+    elif [ "$(fio -v | cut -d '.' -f 1)" == "fio-3" ]; then
+      iops_read=$(grep "IOPS=" "$tmp" | grep read | awk -F[=,]+ '{print $2}')
+      iops_write=$(grep "IOPS=" "$tmp" | grep write | awk -F[=,]+ '{print $2}')
+      bw_read=$(grep "bw=" "$tmp" | grep READ | awk -F"[()]" '{print $2}')
+      bw_write=$(grep "bw=" "$tmp" | grep WRITE | awk -F"[()]" '{print $2}')
+    fi
+
+    message INFO "Read performance     : ${YELLOW}$bw_read${NC}"
+    message INFO "Read IOPS            : ${YELLOW}$iops_read${NC}"
+    message INFO "Write performance    : ${YELLOW}$bw_write${NC}"
+    message INFO "Write IOPS           : ${YELLOW}$iops_write${NC}"
+
+    rm -f "$tmp" fio_test
+  else
+    message INFO "Fio is missing!!! Please install Fio before running test."
+  fi
+}
+calculator_disk() {
+  local total_size=0
+  local size_t size unit
+  local array=("$@") # Lưu toàn bộ tham số vào mảng
+
+  for size in "${array[@]}"; do
+    size_t="${size:0:${#size}-1}" # Lấy phần số
+    unit="${size:(-1)}"           # Lấy ký tự cuối cùng làm đơn vị
+
+    # Chuyển đổi các đơn vị
+    case "$unit" in
+    M) size=$(awk 'BEGIN{printf "%.1f", '"$size_t"' / 1024}') ;; # Từ MB -> GB
+    T) size=$(awk 'BEGIN{printf "%.1f", '"$size_t"' * 1024}') ;; # Từ TB -> GB
+    G) size="$size_t" ;;                                         # GB không cần thay đổi
+    *) size=0 ;;                                                 # Nếu đơn vị không phải M, G, T thì coi như 0
+    esac
+
+    # Cộng kích thước vào tổng
+    total_size=$(awk 'BEGIN{printf "%.1f", '"$total_size"' + '"$size"'}')
+  done
+
+  echo "${total_size}"
+}
+run_speed_test() {
+  local cname cores freq tram uram swap uswap up load opsy arch lbit kern date
+  local disk_size1 disk_size2 disk_total_size disk_used_size
+  cname=$(awk -F: '/model name/ {name=$2} END {print name}' /proc/cpuinfo | sed 's/^[ \t]*//;s/[ \t]*$//')
+  cores=$(awk -F: '/model name/ {core++} END {print core}' /proc/cpuinfo)
+  freq=$(awk -F: '/cpu MHz/ {freq=$2} END {print freq}' /proc/cpuinfo | sed 's/^[ \t]*//;s/[ \t]*$//')
+  tram=$(free -m | awk '/Mem/ {print $2}')
+  uram=$(free -m | awk '/Mem/ {print $3}')
+  swap=$(free -m | awk '/Swap/ {print $2}')
+  uswap=$(free -m | awk '/Swap/ {print $3}')
+  up=$(awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60} {printf("%d days, %d hour %d min\n",a,b,c)}' /proc/uptime)
+  load=$(w | head -1 | awk -F'load average:' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
+  opsy=$(get_operating_system)
+  arch=$(uname -m)
+  lbit=$(getconf LONG_BIT)
+  kern=$(uname -r)
+  date=$(date)
+  read -ra disk_size1 <<<"$(LANG=C df -hPl | grep -wvE '\-|none|tmpfs|devtmpfs|by-uuid|chroot|Filesystem' | awk '{print $2}')"
+  read -ra disk_size2 <<<"$(LANG=C df -hPl | grep -wvE '\-|none|tmpfs|devtmpfs|by-uuid|chroot|Filesystem' | awk '{print $3}')"
+  disk_total_size=$(calculator_disk "${disk_size1[@]}")
+  disk_used_size=$(calculator_disk "${disk_size2[@]}")
+  message INFO "System Info"
+  next
+  message INFO "CPU model               : ${YELLOW}$cname${NC}"
+  message INFO "Number of cores         : ${YELLOW}$cores${NC}"
+  message INFO "CPU frequency           : ${YELLOW}$freq${NC} MHz"
+  message INFO "Total size of Disk      : ${YELLOW}$disk_total_size${NC} GB (${YELLOW}$disk_used_size${NC} GB Used)"
+  message INFO "Total amount of Memory  : ${YELLOW}$tram${NC} MB (${YELLOW}$uram${NC} MB Used)"
+  message INFO "Total amount of Swap    : ${YELLOW}$swap${NC} MB (${YELLOW}$uswap${NC} MB Used)"
+  message INFO "System uptime           : ${YELLOW}$up${NC}"
+  message INFO "Load average            : ${YELLOW}$load${NC}"
+  message INFO "OS                      : ${YELLOW}$opsy${NC}"
+  message INFO "Architecture            : ${YELLOW}$arch${NC} ($lbit Bit)"
+  message INFO "Kernel                  : ${YELLOW}$kern${NC}"
+  message INFO "Virtualization          : ${YELLOW}${virt^^}${NC}"
+  message INFO "Compatibility           : ${YELLOW}$os_compatibility${NC}"
+  message INFO "Server Public IPv4      : ${YELLOW}$(fetch_public_ip)${NC}"
+  if ipv6_is_supported; then
+    message INFO "Server Public IPv6      : ${YELLOW}$(fetch_public_ipv6)${NC}"
+  fi
+  message INFO "Date                    : ${YELLOW}$date${NC}"
+  echo
+  message INFO "Disk Speed"
+  next
+  dd_test
+  echo "------------------------------------------------------------------------------------------"
+  fio_test
+  echo
+  message INFO "Speedtest"
+  next
+  printf "%-40s%-20s%-14s\n" "Node Name" "IPv4 address" "Download Speed"
+  speed && next
+  if ipv6_is_supported; then
+    printf "%-40s%-40s%-14s\n" "Node Name" "IPv6 address" "Download Speed"
+    speed_ipv6 && next
+  fi
+  local speedtest_duration=$SECONDS
+  local _minutes=$((speedtest_duration / 60))
+  local _seconds=$((speedtest_duration % 60))
+  message SUCCESS "Speedtest completed${NC} in ${GREEN}${_minutes} min ${_seconds} seconds${NC}!"
+  message INFO "Powered by BEAR Manage Server Scripts @ Hung Nguyen - hungna.dev@gmail.com"
+  message INFO "Checkout via https://speedtest.nguyenanhung.com/"
+}
+clear
+tmp=$(mktemp)
+run_speed_test | tee "$tmp"
+cat "$tmp" >>~/server-speedtest.log
+if [ -f "$tmp" ]; then
+  rm -f "$tmp"
+fi

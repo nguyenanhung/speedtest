@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kiểm tra tốc độ mạng với các lệnh đơn giản và hiệu quả.">
+    <title>BEAR Server Speedtest</title>
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="BEAR Server Speedtest" />
+    <meta property="og:description" content="Công cụ Test Tốc độ VPS/Server" />
+    <meta property="og:url" content="https://speedtest.nguyenanhung.com" />
+    <meta property="og:site_name" content="BEAR Server Speedtest" />
+    <meta property="fb:admins" content="100001376346062" />
+    <meta property="og:image" content="https://i3.wp.com/speedtest.nguyenanhung.com/image.png?w=1200" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        header p {
+            font-size: 0.9rem;
+        }
+
+        /* Chính giữa của trang */
+        main {
+            flex-grow: 1;
+            padding: 30px 15px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        /* Container chứa các lệnh */
+        .command-container {
+            background: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tiêu đề của các lệnh */
+        .command-title {
+            font-size: 1.2rem;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+
+        /* Ô chứa lệnh */
+        .command {
+            background: #f0f4f8;
+            padding: 10px 15px;
+            border: 1px solid #dcdfe3;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .command:hover {
+            background: #e8eff6;
+        }
+
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px 0;
+            text-align: center;
+            position: relative;
+            width: 100%;
+        }
+
+        footer a {
+            color: #1abc9c;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+    <!-- FAV and TOUCH ICONS -->
+    <link rel="apple-touch-icon" sizes="57x57" href="https://nguyenanhung.com/assets/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="https://nguyenanhung.com/assets/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="https://nguyenanhung.com/assets/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="https://nguyenanhung.com/assets/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="https://nguyenanhung.com/assets/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://nguyenanhung.com/assets/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="https://nguyenanhung.com/assets/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://nguyenanhung.com/assets/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://nguyenanhung.com/assets/favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://nguyenanhung.com/assets/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://nguyenanhung.com/assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="https://nguyenanhung.com/assets/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://nguyenanhung.com/assets/favicon/favicon-16x16.png">
+    <link rel="manifest" href="https://nguyenanhung.com/assets/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="https://nguyenanhung.com/assets/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<header>
+    <h1>BEAR Server Speedtest</h1>
+    <p>Những lệnh nhanh chóng để kiểm tra kết nối mạng server của bạn</p>
+</header>
+
+<main>
+
+    <div class="command-container">
+        <div class="command-title">BEAR Server Speedtest Scripts</div>
+        <div class="command">curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest | bash</div>
+        <div class="description">
+            Lệnh này sẽ tự động kiểm tra, cài đặt các gói cần thiết và tiến hành sử dụng đường truyền của 3 nhà mạng lớn
+            nhất là VNPT, Viettel, FPT trên khắp 3 miền<br/>
+            Đồng thời cũng sẽ tiến hành kiểm tra chéo với các datacenter trên khắp thế giới: USA, EU, APAC... <br/>
+            Tiến hành test cùng lúc IPv4 và IPv6 nếu Server/VPS của bạn có hỗ trợ<br/>
+            Chỉ với một dòng lệnh duy nhất, bạn sẽ có cái nhìn đánh giá tổng quan về server. <br/>
+            Thông tin được lưu trong file log có đường dẫn <code>~/server-speedtest.log</code>
+        </div>
+    </div>
+
+    <div class="command-container">
+        <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên macOS</div>
+        <div class="command">brew tap teamookla/speedtest<br/>
+            brew update<br/>
+            # Example how to remove conflicting or old versions using brew<br/>
+            # brew uninstall speedtest --force<br/>
+            # brew uninstall speedtest-cli --force<br/>
+            brew install speedtest --force
+        </div>
+        <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
+            chạy <code>speedtest</code> để
+            kiểm tra tốc độ mạng.
+        </div>
+    </div>
+
+    <div class="command-container">
+        <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Ubuntu/Debian</div>
+        <div class="command">## If migrating from prior bintray install instructions please first...<br/>
+            # sudo rm /etc/apt/sources.list.d/speedtest.list<br/>
+            # sudo apt-get update<br/>
+            # sudo apt-get remove speedtest<br/>
+            ## Other non-official binaries will conflict with Speedtest CLI<br/>
+            # Example how to remove using apt-get<br/>
+            # sudo apt-get remove speedtest-cli<br/>
+            sudo apt-get install curl<br/>
+            curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash<br/>
+            sudo apt-get install speedtest
+        </div>
+        <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
+            chạy <code>speedtest</code> để
+            kiểm tra tốc độ mạng.
+        </div>
+    </div>
+
+    <div class="command-container">
+        <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Fedora/CentOS/RHEL-Based</div>
+        <div class="command">## If migrating from prior bintray install instructions please first...<br/>
+            # sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo<br/>
+            # sudo yum remove speedtest<br/>
+            ## Other non-official binaries will conflict with Speedtest CLI<br/>
+            # Example how to remove using yum<br/>
+            # rpm -qa | grep speedtest | xargs -I {} sudo yum -y remove {}<br/>
+            curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.rpm.sh | sudo bash<br/>
+            sudo yum install speedtest
+        </div>
+        <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
+            chạy <code>speedtest</code> để
+            kiểm tra tốc độ mạng.
+        </div>
+    </div>
+
+    <div class="command-container">
+        <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên FreeBSD</div>
+        <div class="command">sudo pkg update && sudo pkg install -g libidn2 ca_root_nss<br/>
+            # Example how to remove conflicting or old versions using pkg<br/>
+            # sudo pkg remove speedtest<br/>
+            # freeBSD 12 install<br/>
+            sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd12-x86_64.pkg"<br/>
+            # freeBSD 13 install<br/>
+            sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
+        </div>
+        <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
+            chạy <code>speedtest</code> để
+            kiểm tra tốc độ mạng.
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2024 <a href="https://speedtest.nguyenanhung.com/" target="_blank">BEAR Server Speedtest</a></p>
+    <p>Cảm hứng từ tocdo.net của Luân Trần với nhiều cải tiến</p>
+</footer>
+
+</body>
+</html>
+
+<!-- (c) 2024 Powered by Hung Nguyen <dev@nguyenanhung.com> -->
