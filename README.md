@@ -1,5 +1,76 @@
 # Server / VPS Speedtest
 
+## BEAR Server Speedtest Scripts
+
+```shell
+curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest | bash
+```
+
+1. Lệnh này sẽ tự động kiểm tra, cài đặt các gói cần thiết và tiến hành sử dụng đường truyền của 3 nhà mạng lớn nhất là
+   VNPT, Viettel, FPT trên khắp 3 miền
+2. Đồng thời cũng sẽ tiến hành kiểm tra chéo với các datacenter trên khắp thế giới: USA, EU, APAC...
+3. Tiến hành test cùng lúc IPv4 và IPv6 nếu Server/VPS của bạn có hỗ trợ
+4. Chỉ với một dòng lệnh duy nhất, bạn sẽ có cái nhìn đánh giá tổng quan về server.
+5. Thông tin được lưu trong file log có đường dẫn ~/server-speedtest.log
+
+### Kiểm tra tốc độ bằng `speedtest-cli` trên macOS
+
+```shellbrew tap teamookla/speedtest
+brew update
+# Example how to remove conflicting or old versions using brew
+# brew uninstall speedtest --force
+# brew uninstall speedtest-cli --force
+brew install speedtest --force
+```
+
+Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+
+### Kiểm tra tốc độ bằng `speedtest-cli` trên Ubuntu/Debian
+
+```shell
+## If migrating from prior bintray install instructions please first...
+# sudo rm /etc/apt/sources.list.d/speedtest.list
+# sudo apt-get update
+# sudo apt-get remove speedtest
+## Other non-official binaries will conflict with Speedtest CLI
+# Example how to remove using apt-get
+# sudo apt-get remove speedtest-cli
+sudo apt-get install curl
+curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
+sudo apt-get install speedtest
+```
+
+Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+
+### Kiểm tra tốc độ bằng `speedtest-cli` trên Fedora/CentOS/RHEL-Based
+
+```shell
+## If migrating from prior bintray install instructions please first...
+# sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo
+# sudo yum remove speedtest
+## Other non-official binaries will conflict with Speedtest CLI
+# Example how to remove using yum
+# rpm -qa | grep speedtest | xargs -I {} sudo yum -y remove {}
+curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.rpm.sh | sudo bash
+sudo yum install speedtest
+```
+
+Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+
+### Kiểm tra tốc độ bằng `speedtest-cli` trên FreeBSD
+
+```shell
+sudo pkg update && sudo pkg install -g libidn2 ca_root_nss
+# Example how to remove conflicting or old versions using pkg
+# sudo pkg remove speedtest
+# freeBSD 12 install
+sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd12-x86_64.pkg"
+# freeBSD 13 install
+sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
+```
+
+Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+
 ## Contact
 
 | Name        | Email                | GitHub        | Facebook      |
