@@ -20,6 +20,8 @@ curl -H "Cache-Control: no-cache" -Lso- https://raw.githubusercontent.com/nguyen
 3. Tiến hành test cùng lúc IPv4 và IPv6 nếu Server/VPS của bạn có hỗ trợ
 4. Chỉ với một dòng lệnh duy nhất, bạn sẽ có cái nhìn đánh giá tổng quan về server.
 5. Thông tin được lưu trong file log có đường dẫn ~/server-speedtest.log
+6. Scripts không gửi bất cứ thông tin nào về máy chủ của chúng tôi, cũng ko share đi đâu cả, vì vậy có thể yên tâm sử
+   dụng ở các máy chủ enterprise mà không lo ngại vấn đề policy
 
 ### Kiểm tra tốc độ bằng `speedtest-cli` trên macOS
 
@@ -78,6 +80,11 @@ sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebs
 ```
 
 Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+
+## Notes️
+
+Dự án này có tham khảo và lấy cảm hứng từ tocdo.net của Luân Trần với nhiều cải tiến và bổ sung cho phù hợp tình hình
+thực tế và nhu cầu sử dụng!
 
 ## Contact
 
