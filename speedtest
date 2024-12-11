@@ -40,7 +40,7 @@ function catch_abort() {
 #                       |___/         |___/       |___/                          #
 #--------------------------------------------------------------------------------#
 #                       BEAR Manage Server Script Configure                      #
-# Manage Server by Hung Nguyen - hungna.dev@gmail.com - http://nguyenanhung.com #
+# Manage Server by Hung Nguyen - hungna.dev@gmail.com - http://nguyenanhung.com  #
 # Any copying without written permission is a violation of copyright policy!     #
 ##################################################################################
 export NC='\033[0m'
