@@ -1,9 +1,17 @@
 # Server / VPS Speedtest
 
-## BEAR Server Speedtest Scripts
+### BEAR Server Speedtest Scripts
+
+Bạn có thể chạy 1 trong 2 lệnh dưới
 
 ```shell
 curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest | bash
+```
+
+hoặc
+
+```shell
+curl -H "Cache-Control: no-cache" -Lso- https://raw.githubusercontent.com/nguyenanhung/speedtest/refs/heads/main/speedtest | bash
 ```
 
 1. Lệnh này sẽ tự động kiểm tra, cài đặt các gói cần thiết và tiến hành sử dụng đường truyền của 3 nhà mạng lớn nhất là
