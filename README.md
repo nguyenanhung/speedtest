@@ -40,7 +40,7 @@ brew update
 brew install speedtest --force
 ```
 
-Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+Tiến hành cài đặt công cụ `Speedtest CLI` theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
 
 ### Kiểm tra tốc độ bằng `speedtest-cli` trên Ubuntu/Debian
 
@@ -57,7 +57,7 @@ curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.
 sudo apt-get install speedtest
 ```
 
-Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+Tiến hành cài đặt công cụ `Speedtest CLI` theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
 
 ### Kiểm tra tốc độ bằng `speedtest-cli` trên Fedora/CentOS/RHEL-Based
 
@@ -72,7 +72,7 @@ curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.
 sudo yum install speedtest
 ```
 
-Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+Tiến hành cài đặt công cụ `Speedtest CLI` theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
 
 ### Kiểm tra tốc độ bằng `speedtest-cli` trên FreeBSD
 
@@ -86,7 +86,7 @@ sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebs
 sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
 ```
 
-Tiến hành cài đặt công cụ Speedtest CLI theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
+Tiến hành cài đặt công cụ `Speedtest CLI` theo hướng dẫn bên trên. Sau đó chạy `speedtest` để kiểm tra tốc độ mạng.
 
 ## Notes️
 
