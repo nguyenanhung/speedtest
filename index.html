@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Kiểm tra tốc độ mạng với các lệnh đơn giản và hiệu quả.">
+    <meta name="description" content="Cách đơn giản nhất để kiểm tra tốc độ mạng của Server/VPS của bạn">
     <title>BEAR Server Speedtest</title>
     <meta property="og:locale" content="en_US"/>
     <meta property="og:type" content="website"/>
     <meta property="og:title" content="BEAR Server Speedtest"/>
-    <meta property="og:description" content="Công cụ Test Tốc độ VPS/Server"/>
+    <meta property="og:description" content="Cách đơn giản nhất để kiểm tra tốc độ mạng của Server/VPS của bạn"/>
     <meta property="og:url" content="https://speedtest.nguyenanhung.com"/>
     <meta property="og:site_name" content="BEAR Server Speedtest"/>
     <meta property="fb:admins" content="100001376346062"/>
@@ -125,9 +126,10 @@
     <meta name="theme-color" content="#ffffff">
 </head>
 <body>
+
 <header>
     <h1>BEAR Server Speedtest</h1>
-    <p>Những lệnh nhanh chóng để kiểm tra kết nối mạng server của bạn</p>
+    <p>Cách đơn giản nhất để kiểm tra tốc độ mạng của Server/VPS của bạn</p>
 </header>
 
 <main>
@@ -136,18 +138,20 @@
         <div class="command-title">BEAR Server Speedtest Scripts</div>
         <div class="command">curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest | bash
         </div>
+        <br/>
         <div class="description">
-            Lệnh này sẽ tự động kiểm tra, cài đặt các gói cần thiết và tiến hành sử dụng đường truyền của 3 nhà mạng lớn
+            1. Lệnh này sẽ tự động kiểm tra, cài đặt các gói cần thiết và tiến hành sử dụng đường truyền của 3 nhà mạng
+            lớn
             nhất là VNPT, Viettel, FPT trên khắp 3 miền<br/>
-            Đồng thời cũng sẽ tiến hành kiểm tra chéo với các datacenter trên khắp thế giới: USA, EU, APAC... <br/>
-            Tiến hành test cùng lúc IPv4 và IPv6 nếu Server/VPS của bạn có hỗ trợ<br/>
-            Chỉ với một dòng lệnh duy nhất, bạn sẽ có cái nhìn đánh giá tổng quan về server. <br/>
-            Thông tin được lưu trong file log có đường dẫn <code>~/server-speedtest.log</code>
+            2. Đồng thời cũng sẽ tiến hành kiểm tra chéo với các datacenter trên khắp thế giới: USA, EU, APAC... <br/>
+            3. Tiến hành test cùng lúc IPv4 và IPv6 nếu Server/VPS của bạn có hỗ trợ<br/>
+            4. Chỉ với một dòng lệnh duy nhất, bạn sẽ có cái nhìn đánh giá tổng quan về server. <br/>
+            5. Thông tin được lưu trong file log có đường dẫn <code>~/server-speedtest.log</code>
         </div>
     </div>
 
     <div class="command-container">
-        <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên macOS</div>
+        <div class="command-title">Kiểm tra tốc độ bằng `<code>speedtest-cli</code>` trên macOS</div>
         <div class="command">brew tap teamookla/speedtest<br/>
             brew update<br/>
             # Example how to remove conflicting or old versions using brew<br/>
@@ -155,6 +159,7 @@
             # brew uninstall speedtest-cli --force<br/>
             brew install speedtest --force
         </div>
+        <br/>
         <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
             chạy <code>speedtest</code> để
             kiểm tra tốc độ mạng.
@@ -162,7 +167,7 @@
     </div>
 
     <div class="command-container">
-        <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Ubuntu/Debian</div>
+        <div class="command-title">Kiểm tra tốc độ bằng `<code>speedtest-cli</code>` trên Ubuntu/Debian</div>
         <div class="command">## If migrating from prior bintray install instructions please first...<br/>
             # sudo rm /etc/apt/sources.list.d/speedtest.list<br/>
             # sudo apt-get update<br/>
@@ -174,6 +179,7 @@
             curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash<br/>
             sudo apt-get install speedtest
         </div>
+        <br/>
         <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
             chạy <code>speedtest</code> để
             kiểm tra tốc độ mạng.
@@ -181,7 +187,7 @@
     </div>
 
     <div class="command-container">
-        <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Fedora/CentOS/RHEL-Based</div>
+        <div class="command-title">Kiểm tra tốc độ bằng `<code>speedtest-cli</code>` trên Fedora/CentOS/RHEL-Based</div>
         <div class="command">## If migrating from prior bintray install instructions please first...<br/>
             # sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo<br/>
             # sudo yum remove speedtest<br/>
@@ -191,6 +197,7 @@
             curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.rpm.sh | sudo bash<br/>
             sudo yum install speedtest
         </div>
+        <br/>
         <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
             chạy <code>speedtest</code> để
             kiểm tra tốc độ mạng.
@@ -198,7 +205,7 @@
     </div>
 
     <div class="command-container">
-        <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên FreeBSD</div>
+        <div class="command-title">Kiểm tra tốc độ bằng `<code>speedtest-cli</code>` trên FreeBSD</div>
         <div class="command">sudo pkg update && sudo pkg install -g libidn2 ca_root_nss<br/>
             # Example how to remove conflicting or old versions using pkg<br/>
             # sudo pkg remove speedtest<br/>
@@ -207,6 +214,7 @@
             # freeBSD 13 install<br/>
             sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
         </div>
+        <br/>
         <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
             chạy <code>speedtest</code> để
             kiểm tra tốc độ mạng.
