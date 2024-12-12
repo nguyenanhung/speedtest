@@ -1,28 +1,30 @@
 #!/bin/bash
-# Get the script's filename without path
-directory_name=$(dirname "$0")
-script_name=$(basename "$0")
-# Generate a unique lock file name by combining the directory name and script name,
-# converting them to lowercase, replacing spaces and non-alphanumeric characters with hyphens,
-locked_name="${directory_name}-${script_name}-by-${USER}"
-locked_name=$(echo "$locked_name" | tr '[:upper:]' '[:lower:]') # Convert to lowercase
-locked_name=$(echo "$locked_name" | sed -E 's/[^a-z0-9]+/-/g')  # Replace spaces and non-alphanumeric characters with hyphens
-locked_name=$(echo "$locked_name" | sed -E 's/^-+|-+$//g')      # Remove any extra hyphens at the beginning or end of the string
-mkdir -p /tmp/hungng-locked && chmod 0777 /tmp/hungng-locked
-locked_filename="/tmp/hungng-locked/${locked_name}.lock"
-# Lock the script so that only one instance can run at a time.
-exec 200>"${locked_filename}" || exit 1
+if command -v flock &>/dev/null; then
+  # Get the script's filename without path
+  directory_name=$(dirname "$0")
+  script_name=$(basename "$0")
+  # Generate a unique lock file name by combining the directory name and script name,
+  # converting them to lowercase, replacing spaces and non-alphanumeric characters with hyphens,
+  locked_name="${directory_name}-${script_name}-by-${USER}"
+  locked_name=$(echo "$locked_name" | tr '[:upper:]' '[:lower:]') # Convert to lowercase
+  locked_name=$(echo "$locked_name" | sed -E 's/[^a-z0-9]+/-/g')  # Replace spaces and non-alphanumeric characters with hyphens
+  locked_name=$(echo "$locked_name" | sed -E 's/^-+|-+$//g')      # Remove any extra hyphens at the beginning or end of the string
+  mkdir -p /tmp/hungng-locked && chmod 0777 /tmp/hungng-locked
+  locked_filename="/tmp/hungng-locked/${locked_name}.lock"
+  # Lock the script so that only one instance can run at a time.
+  exec 200>"${locked_filename}" || exit 1
+  flock -n 200 || exit 1
+fi
 SECONDS=0
-flock -n 200 || exit 1
 trap catch_abort INT
 function catch_abort() {
   local install_path="/tmp/scripts/speedtest"
   echo -e "\n** Aborting. Cleaning up files...\n"
-  if [ -f "fio_test" ]; then
-    rm -f fio_test
+  if [ -f "bear_speedtest_fio_test_file" ]; then
+    rm -f bear_speedtest_fio_test_file
   fi
-  if [ -f "test_$$" ]; then
-    rm -f test_$$
+  if [ -f "bear_speedtest_io_test_file_$$" ]; then
+    rm -f bear_speedtest_io_test_file_$$
   fi
   if [ -f "$install_path" ]; then
     rm -f "$install_path"
@@ -484,7 +486,7 @@ speed_ipv6() {
   speed_ipv6_of_bear_selected_server_test
 }
 io_test() {
-  (LANG=C dd if=/dev/zero of=test_$$ bs=64k count=16k conv=fdatasync && rm -f test_$$) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//'
+  (LANG=C dd if=/dev/zero of=bear_speedtest_io_test_file_$$ bs=64k count=16k conv=fdatasync && rm -f bear_speedtest_io_test_file_$$) 2>&1 | awk -F, '{io=$NF} END { print io}' | sed 's/^[ \t]*//;s/[ \t]*$//'
 }
 dd_test() {
   local io1 io2 io3 ioraw1 ioraw2 ioraw3 ioall ioavg
@@ -510,7 +512,7 @@ fio_test() {
     message INFO "Fio Test"
     local tmp
     tmp=$(mktemp)
-    fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=fio_test --filename=fio_test --bs=4k --numjobs=1 --iodepth=64 --size=256M --readwrite=randrw --rwmixread=75 --runtime=30 --time_based --output="$tmp"
+    fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=fio_test --filename=bear_speedtest_fio_test_file --bs=4k --numjobs=1 --iodepth=64 --size=256M --readwrite=randrw --rwmixread=75 --runtime=30 --time_based --output="$tmp"
     local iops_read iops_write bw_read bw_write
 
     if [ "$(fio -v | cut -d '.' -f 1)" == "fio-2" ]; then
@@ -531,7 +533,7 @@ fio_test() {
     message INFO "Write performance    : ${YELLOW}$bw_write${NC}"
     message INFO "Write IOPS           : ${YELLOW}$iops_write${NC}"
 
-    rm -f "$tmp" fio_test
+    rm -f "$tmp" bear_speedtest_fio_test_file
   else
     message INFO "Fio is missing!!! Please install Fio before running test."
   fi
@@ -539,21 +541,19 @@ fio_test() {
 calculator_disk() {
   local total_size=0
   local size_t size unit
-  local array=("$@") # Lưu toàn bộ tham số vào mảng
+  local array=("$@")
 
   for size in "${array[@]}"; do
-    size_t="${size:0:${#size}-1}" # Lấy phần số
-    unit="${size:(-1)}"           # Lấy ký tự cuối cùng làm đơn vị
+    size_t="${size:0:${#size}-1}"
+    unit="${size:(-1)}"
 
-    # Chuyển đổi các đơn vị
     case "$unit" in
-    M) size=$(awk 'BEGIN{printf "%.1f", '"$size_t"' / 1024}') ;; # Từ MB -> GB
-    T) size=$(awk 'BEGIN{printf "%.1f", '"$size_t"' * 1024}') ;; # Từ TB -> GB
-    G) size="$size_t" ;;                                         # GB không cần thay đổi
-    *) size=0 ;;                                                 # Nếu đơn vị không phải M, G, T thì coi như 0
+    M) size=$(awk 'BEGIN{printf "%.1f", '"$size_t"' / 1024}') ;;
+    T) size=$(awk 'BEGIN{printf "%.1f", '"$size_t"' * 1024}') ;;
+    G) size="$size_t" ;;
+    *) size=0 ;;
     esac
 
-    # Cộng kích thước vào tổng
     total_size=$(awk 'BEGIN{printf "%.1f", '"$total_size"' + '"$size"'}')
   done
 
@@ -620,7 +620,7 @@ run_speed_test() {
   local _seconds=$((speedtest_duration % 60))
   message SUCCESS "Speedtest completed${NC} in ${GREEN}${_minutes} min ${_seconds} seconds${NC}!"
   message INFO "Powered by BEAR Manage Server Scripts @ Hung Nguyen - hungna.dev@gmail.com"
-  message INFO "Checkout via https://speedtest.nguyenanhung.com/"
+  message INFO "See at https://speedtest.nguyenanhung.com"
 }
 clear
 tmp=$(mktemp)
