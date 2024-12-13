@@ -53,7 +53,6 @@
             margin: auto;
         }
 
-        /* Container chứa các lệnh */
         .command-container {
             background: #fff;
             padding: 20px;
@@ -62,27 +61,58 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* Tiêu đề của các lệnh */
-        .command-title {
-            font-size: 1.2rem;
-            color: #34495e;
-            margin-bottom: 10px;
+        .command {
+            background: #2e2e2e;
+            border-radius: 10px;
+            overflow: hidden;
+            font-family: monospace;
+            color: #dcdcdc;
         }
 
-        /* Ô chứa lệnh */
-        .command {
-            background: #f0f4f8;
-            padding: 10px 15px;
-            border: 1px solid #dcdfe3;
-            border-radius: 5px;
-            font-family: monospace;
+        .command-header {
+            background: #444;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .macos-icons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .macos-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .macos-icon.red {
+            background-color: #ff5f57;
+        }
+
+        .macos-icon.yellow {
+            background-color: #ffbd2e;
+        }
+
+        .macos-icon.green {
+            background-color: #28c840;
+        }
+
+        .command-body {
+            padding: 15px 20px;
             font-size: 0.95rem;
             overflow-x: auto;
-            white-space: nowrap;
         }
 
-        .command:hover {
-            background: #e8eff6;
+        .command-title {
+            flex-grow: 1;
+            text-align: left;
+            font-size: 16px;
+            font-weight: bold;
+            color: #f2efef;
+            padding-left: 15px;
         }
 
         /* Footer */
@@ -135,8 +165,19 @@
 <main>
 
     <div class="command-container">
-        <div class="command-title">BEAR Server Speedtest Scripts</div>
-        <div class="command">curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest | bash
+        <div class="command">
+            <div class="command-header">
+                <div class="macos-icons">
+                    <div class="macos-icon red"></div>
+                    <div class="macos-icon yellow"></div>
+                    <div class="macos-icon green"></div>
+                </div>
+                <div class="command-title">BEAR Server Speedtest Scripts</div>
+                <div class="copy"></div>
+            </div>
+            <div class="command-body">
+                curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest | bash
+            </div>
         </div>
         <br/>
         <div class="description">
@@ -151,13 +192,23 @@
     </div>
 
     <div class="command-container">
-        <div class="command-title">Kiểm tra tốc độ bằng `<code>speedtest-cli</code>` trên macOS</div>
-        <div class="command">brew tap teamookla/speedtest<br/>
-            brew update<br/>
-            # Example how to remove conflicting or old versions using brew<br/>
-            # brew uninstall speedtest --force<br/>
-            # brew uninstall speedtest-cli --force<br/>
-            brew install speedtest --force
+        <div class="command">
+            <div class="command-header">
+                <div class="macos-icons">
+                    <div class="macos-icon red"></div>
+                    <div class="macos-icon yellow"></div>
+                    <div class="macos-icon green"></div>
+                </div>
+                <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên macOS</div>
+            </div>
+            <div class="command-body">
+                brew tap teamookla/speedtest<br/>
+                brew update<br/>
+                # Example how to remove conflicting or old versions using brew<br/>
+                # brew uninstall speedtest --force<br/>
+                # brew uninstall speedtest-cli --force<br/>
+                brew install speedtest --force
+            </div>
         </div>
         <br/>
         <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
@@ -167,17 +218,27 @@
     </div>
 
     <div class="command-container">
-        <div class="command-title">Kiểm tra tốc độ bằng `<code>speedtest-cli</code>` trên Ubuntu/Debian</div>
-        <div class="command">## If migrating from prior bintray install instructions please first...<br/>
-            # sudo rm /etc/apt/sources.list.d/speedtest.list<br/>
-            # sudo apt-get update<br/>
-            # sudo apt-get remove speedtest<br/>
-            ## Other non-official binaries will conflict with Speedtest CLI<br/>
-            # Example how to remove using apt-get<br/>
-            # sudo apt-get remove speedtest-cli<br/>
-            sudo apt-get install curl<br/>
-            curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash<br/>
-            sudo apt-get install speedtest
+        <div class="command">
+            <div class="command-header">
+                <div class="macos-icons">
+                    <div class="macos-icon red"></div>
+                    <div class="macos-icon yellow"></div>
+                    <div class="macos-icon green"></div>
+                </div>
+                <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Ubuntu/Debian</div>
+            </div>
+            <div class="command-body">
+                ## If migrating from prior bintray install instructions please first...<br/>
+                # sudo rm /etc/apt/sources.list.d/speedtest.list<br/>
+                # sudo apt-get update<br/>
+                # sudo apt-get remove speedtest<br/>
+                ## Other non-official binaries will conflict with Speedtest CLI<br/>
+                # Example how to remove using apt-get<br/>
+                # sudo apt-get remove speedtest-cli<br/>
+                sudo apt-get install curl<br/>
+                curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash<br/>
+                sudo apt-get install speedtest
+            </div>
         </div>
         <br/>
         <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
@@ -187,15 +248,25 @@
     </div>
 
     <div class="command-container">
-        <div class="command-title">Kiểm tra tốc độ bằng `<code>speedtest-cli</code>` trên Fedora/CentOS/RHEL-Based</div>
-        <div class="command">## If migrating from prior bintray install instructions please first...<br/>
-            # sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo<br/>
-            # sudo yum remove speedtest<br/>
-            ## Other non-official binaries will conflict with Speedtest CLI<br/>
-            # Example how to remove using yum<br/>
-            # rpm -qa | grep speedtest | xargs -I {} sudo yum -y remove {}<br/>
-            curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.rpm.sh | sudo bash<br/>
-            sudo yum install speedtest
+        <div class="command">
+            <div class="command-header">
+                <div class="macos-icons">
+                    <div class="macos-icon red"></div>
+                    <div class="macos-icon yellow"></div>
+                    <div class="macos-icon green"></div>
+                </div>
+                <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Fedora/CentOS/RHEL-Based</div>
+            </div>
+            <div class="command-body">
+                ## If migrating from prior bintray install instructions please first...<br/>
+                # sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo<br/>
+                # sudo yum remove speedtest<br/>
+                ## Other non-official binaries will conflict with Speedtest CLI<br/>
+                # Example how to remove using yum<br/>
+                # rpm -qa | grep speedtest | xargs -I {} sudo yum -y remove {}<br/>
+                curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.rpm.sh | sudo bash<br/>
+                sudo yum install speedtest
+            </div>
         </div>
         <br/>
         <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
@@ -205,14 +276,23 @@
     </div>
 
     <div class="command-container">
-        <div class="command-title">Kiểm tra tốc độ bằng `<code>speedtest-cli</code>` trên FreeBSD</div>
-        <div class="command">sudo pkg update && sudo pkg install -g libidn2 ca_root_nss<br/>
-            # Example how to remove conflicting or old versions using pkg<br/>
-            # sudo pkg remove speedtest<br/>
-            # freeBSD 12 install<br/>
-            sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd12-x86_64.pkg"<br/>
-            # freeBSD 13 install<br/>
-            sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
+        <div class="command">
+            <div class="command-header">
+                <div class="macos-icons">
+                    <div class="macos-icon red"></div>
+                    <div class="macos-icon yellow"></div>
+                    <div class="macos-icon green"></div>
+                </div>
+                <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên FreeBSD</div>
+            </div>
+            <div class="command-body">sudo pkg update && sudo pkg install -g libidn2 ca_root_nss<br/>
+                # Example how to remove conflicting or old versions using pkg<br/>
+                # sudo pkg remove speedtest<br/>
+                # freeBSD 12 install<br/>
+                sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd12-x86_64.pkg"<br/>
+                # freeBSD 13 install<br/>
+                sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
+            </div>
         </div>
         <br/>
         <div class="description">Tiến hành cài đặt công cụ <code>Speedtest CLI</code> theo hướng dẫn bên trên. Sau đó
