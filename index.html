@@ -104,6 +104,7 @@
             padding: 15px 20px;
             font-size: 0.95rem;
             overflow-x: auto;
+            white-space: pre-line; /* Preserve line breaks in the text */
         }
 
         .command-title {
@@ -113,6 +114,27 @@
             font-weight: bold;
             color: #f2efef;
             padding-left: 15px;
+        }
+
+        .copy-button {
+            background-color: #1ABC9C; /* Nền xanh ngọc nhạt */
+            color: #FFF; /* Chữ trắng nổi bật */
+            border: 2px solid #16A085; /* Viền xanh ngọc đậm */
+            border-radius: 4px;
+            padding: 5px 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background-color: #16A085; /* Xanh ngọc đậm khi hover */
+            border-color: #12897A; /* Viền tối hơn khi hover */
+        }
+
+        .copy-button:active {
+            background-color: #12897A; /* Xanh ngọc tối hơn khi nhấn */
+            border-color: #0F7764; /* Viền đậm hơn khi nhấn */
         }
 
         /* Footer */
@@ -173,10 +195,10 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">BEAR Server Speedtest Scripts</div>
-                <div class="copy"></div>
+                <button class="copy-button">Copy</button>
             </div>
-            <div class="command-body">
-                curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest | bash
+            <div class="command-body">curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest |
+                bash
             </div>
         </div>
         <br/>
@@ -187,7 +209,9 @@
             2. Đồng thời cũng sẽ tiến hành kiểm tra chéo với các datacenter trên khắp thế giới: USA, EU, APAC... <br/>
             3. Tiến hành test cùng lúc IPv4 và IPv6 nếu Server/VPS của bạn có hỗ trợ<br/>
             4. Chỉ với một dòng lệnh duy nhất, bạn sẽ có cái nhìn đánh giá tổng quan về server. <br/>
-            5. Thông tin được lưu trong file log có đường dẫn <code>~/server-speedtest.log</code>
+            5. Thông tin được lưu trong file log có đường dẫn <code>~/server-speedtest.log</code><br/>
+            6. Scripts không gửi bất cứ thông tin nào về máy chủ của chúng tôi, cũng ko share đi đâu cả, vì vậy có thể
+            yên tâm sử dụng ở các máy chủ enterprise mà không lo ngại vấn đề policy
         </div>
     </div>
 
@@ -200,13 +224,13 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên macOS</div>
+                <button class="copy-button">Copy</button>
             </div>
-            <div class="command-body">
-                brew tap teamookla/speedtest<br/>
-                brew update<br/>
-                # Example how to remove conflicting or old versions using brew<br/>
-                # brew uninstall speedtest --force<br/>
-                # brew uninstall speedtest-cli --force<br/>
+            <div class="command-body">brew tap teamookla/speedtest
+                brew update
+                # Example how to remove conflicting or old versions using brew
+                # brew uninstall speedtest --force
+                # brew uninstall speedtest-cli --force
                 brew install speedtest --force
             </div>
         </div>
@@ -226,17 +250,17 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Ubuntu/Debian</div>
+                <button class="copy-button">Copy</button>
             </div>
-            <div class="command-body">
-                ## If migrating from prior bintray install instructions please first...<br/>
-                # sudo rm /etc/apt/sources.list.d/speedtest.list<br/>
-                # sudo apt-get update<br/>
-                # sudo apt-get remove speedtest<br/>
-                ## Other non-official binaries will conflict with Speedtest CLI<br/>
-                # Example how to remove using apt-get<br/>
-                # sudo apt-get remove speedtest-cli<br/>
-                sudo apt-get install curl<br/>
-                curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash<br/>
+            <div class="command-body">## If migrating from prior bintray install instructions please first...
+                # sudo rm /etc/apt/sources.list.d/speedtest.list
+                # sudo apt-get update
+                # sudo apt-get remove speedtest
+                ## Other non-official binaries will conflict with Speedtest CLI
+                # Example how to remove using apt-get
+                # sudo apt-get remove speedtest-cli
+                sudo apt-get install curl
+                curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
                 sudo apt-get install speedtest
             </div>
         </div>
@@ -256,15 +280,15 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Fedora/CentOS/RHEL-Based</div>
+                <button class="copy-button">Copy</button>
             </div>
-            <div class="command-body">
-                ## If migrating from prior bintray install instructions please first...<br/>
-                # sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo<br/>
-                # sudo yum remove speedtest<br/>
-                ## Other non-official binaries will conflict with Speedtest CLI<br/>
-                # Example how to remove using yum<br/>
-                # rpm -qa | grep speedtest | xargs -I {} sudo yum -y remove {}<br/>
-                curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.rpm.sh | sudo bash<br/>
+            <div class="command-body">## If migrating from prior bintray install instructions please first...
+                # sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo
+                # sudo yum remove speedtest
+                ## Other non-official binaries will conflict with Speedtest CLI
+                # Example how to remove using yum
+                # rpm -qa | grep speedtest | xargs -I {} sudo yum -y remove {}
+                curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.rpm.sh | sudo bash
                 sudo yum install speedtest
             </div>
         </div>
@@ -284,13 +308,14 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên FreeBSD</div>
+                <button class="copy-button">Copy</button>
             </div>
-            <div class="command-body">sudo pkg update && sudo pkg install -g libidn2 ca_root_nss<br/>
-                # Example how to remove conflicting or old versions using pkg<br/>
-                # sudo pkg remove speedtest<br/>
-                # freeBSD 12 install<br/>
-                sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd12-x86_64.pkg"<br/>
-                # freeBSD 13 install<br/>
+            <div class="command-body">sudo pkg update && sudo pkg install -g libidn2 ca_root_nss
+                # Example how to remove conflicting or old versions using pkg
+                # sudo pkg remove speedtest
+                # freeBSD 12 install
+                sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd12-x86_64.pkg"
+                # freeBSD 13 install
                 sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
             </div>
         </div>
@@ -311,7 +336,33 @@
     </p>
     <p>Cảm hứng từ tocdo.net của Luân Trần với nhiều cải tiến</p>
 </footer>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select all copy buttons
+        const copyButtons = document.querySelectorAll('.copy-button');
 
+        copyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Find the nearest .command-body
+                const commandBody = button.closest('.command').querySelector('.command-body');
+
+                // Copy text to clipboard
+                if (commandBody) {
+                    const textToCopy = commandBody.innerText.trim();
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        // Optionally, provide feedback to the user
+                        button.innerText = 'Copied!';
+                        setTimeout(() => {
+                            button.innerText = 'Copy';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Error copying text: ', err);
+                    });
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>
 
