@@ -14,6 +14,10 @@
     <meta property="og:site_name" content="BEAR Server Speedtest"/>
     <meta property="fb:admins" content="100001376346062"/>
     <meta property="og:image" content="https://i3.wp.com/speedtest.nguyenanhung.com/image.png?w=1200"/>
+    <!-- Font Awesome Free 5.11.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+          integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <style>
         body {
             margin: 0;
@@ -167,8 +171,7 @@
     <link rel="apple-touch-icon" sizes="144x144" href="https://nguyenanhung.com/assets/favicon/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="152x152" href="https://nguyenanhung.com/assets/favicon/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="https://nguyenanhung.com/assets/favicon/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192"
-          href="https://nguyenanhung.com/assets/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://nguyenanhung.com/assets/favicon/android-icon-192x192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="https://nguyenanhung.com/assets/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="https://nguyenanhung.com/assets/favicon/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://nguyenanhung.com/assets/favicon/favicon-16x16.png">
@@ -195,7 +198,7 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">BEAR Server Speedtest Scripts</div>
-                <button class="copy-button">Copy</button>
+                <button class="copy-button"><i class="fa fa-copy"></i> Copy</button>
             </div>
             <div class="command-body">curl -H "Cache-Control: no-cache" -Lso- https://bash.nguyenanhung.com/speedtest | bash</div>
         </div>
@@ -222,7 +225,7 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên macOS</div>
-                <button class="copy-button">Copy</button>
+                <button class="copy-button"><i class="fa fa-copy"></i> Copy</button>
             </div>
             <div class="command-body">brew tap teamookla/speedtest
                 brew update
@@ -248,7 +251,7 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Ubuntu/Debian</div>
-                <button class="copy-button">Copy</button>
+                <button class="copy-button"><i class="fa fa-copy"></i> Copy</button>
             </div>
             <div class="command-body">## If migrating from prior bintray install instructions please first...
                 # sudo rm /etc/apt/sources.list.d/speedtest.list
@@ -278,7 +281,7 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên Fedora/CentOS/RHEL-Based</div>
-                <button class="copy-button">Copy</button>
+                <button class="copy-button"><i class="fa fa-copy"></i> Copy</button>
             </div>
             <div class="command-body">## If migrating from prior bintray install instructions please first...
                 # sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo
@@ -306,7 +309,7 @@
                     <div class="macos-icon green"></div>
                 </div>
                 <div class="command-title">Kiểm tra tốc độ bằng `speedtest-cli` trên FreeBSD</div>
-                <button class="copy-button">Copy</button>
+                <button class="copy-button"><i class="fa fa-copy"></i> Copy</button>
             </div>
             <div class="command-body">sudo pkg update && sudo pkg install -g libidn2 ca_root_nss
                 # Example how to remove conflicting or old versions using pkg
@@ -348,11 +351,12 @@
                 if (commandBody) {
                     const textToCopy = commandBody.innerText.trim();
                     navigator.clipboard.writeText(textToCopy).then(() => {
-                        // Optionally, provide feedback to the user
-                        button.innerText = 'Copied!';
+                        // Update button text with a tick icon
+                        button.innerHTML = '<i class="fa fa-check"></i> Copied!';
                         setTimeout(() => {
-                            button.innerText = 'Copy';
-                        }, 2000);
+                            // Revert to original button text with copy icon
+                            button.innerHTML = '<i class="fa fa-copy"></i> Copy';
+                        }, 2000); // Change back after 2 seconds
                     }).catch(err => {
                         console.error('Error copying text: ', err);
                     });
