@@ -600,9 +600,9 @@ run_speed_test() {
   message INFO "Kernel                  : ${YELLOW}$kern${NC}"
   message INFO "Virtualization          : ${YELLOW}${virt^^}${NC}"
   message INFO "Compatibility           : ${YELLOW}$os_compatibility${NC}"
-  message INFO "Server Public IPv4      : ✅ ${YELLOW}$(fetch_public_ip)${NC}"
+  message INFO "Server Public IPv4      : √ ${YELLOW}$(fetch_public_ip)${NC}"
   if ipv6_is_supported; then
-    message INFO "Server Public IPv6      : ✅ ${YELLOW}$(fetch_public_ipv6)${NC}"
+    message INFO "Server Public IPv6      : √ ${YELLOW}$(fetch_public_ipv6)${NC}"
   else
     message INFO "Server IPv6             : ❌ ${NC}OFFLINE"
   fi
