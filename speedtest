@@ -446,7 +446,7 @@ speed_of_vietnam_telco_test() {
   speed_test 'https://dn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Da Nang, VN'
   speed_test 'https://sg1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ho Chi Minh, VN'
   speed_test 'https://speedtest.vtconline.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VTC Online, Ha Noi, VN'
-  speed_test 'https://speedtest.vitechcheap.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VitechCheap, Ha Noi, VN'
+  #speed_test 'https://speedtest.vitechcheap.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VitechCheap, Ha Noi, VN'
   speed_test 'https://vhn.vietpn.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VietPN, Ha Noi, VN'
   speed_test 'https://vhcm.vietpn.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VietPN, Ho Chi Minh, VN'
 }
