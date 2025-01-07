@@ -14,6 +14,14 @@ locked_filename="/tmp/hungng-locked/${locked_name}.lock"
 exec 200>"${locked_filename}" || exit 1
 flock -n 200 || exit 1
 SECONDS=0
+
+# Get IP Information Temporary
+test_time_start=$(date "+%Y-%m-%d %H:%M:%S")
+test_time_exec=$(date +"%Y-%m-%d-%I-%M-%S-%p")
+user_home_dir=$(eval echo ~"${USER}")                           # Define the user's home directory
+user_tmp_dir="${user_home_dir}/tmp"                             # Define the temporary directory and file path
+ip_info_tmp_file="${user_tmp_dir}/ipinfo-${test_time_exec}.txt" # Define temporary file to store IP information
+
 trap catch_abort INT
 function catch_abort() {
   local install_path="/tmp/scripts/speedtest"
@@ -26,6 +34,9 @@ function catch_abort() {
   fi
   if [ -f "$install_path" ]; then
     rm -f "$install_path"
+  fi
+  if [ -f "$ip_info_tmp_file" ]; then
+    rm -f "$ip_info_tmp_file"
   fi
   exit 0
 }
@@ -439,7 +450,7 @@ speed_of_vietnam_telco_test() {
   speed_test 'https://speedtesthn.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ha Noi, VN'
   speed_test 'https://speedtestdng.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Da Nang, VN'
   speed_test 'https://speedtest.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ho Chi Minh, VN'
-  speed_test 'http://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
+  speed_test 'https://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
   speed_test 'https://hcmspeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ho Chi Minh, VN'
   speed_test 'https://speedtest.vpsttt.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VPSTTT, Ha Noi, VN'
   speed_test 'https://hn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ha Noi, VN'
@@ -461,7 +472,7 @@ speed_ipv6_of_vietnam_telco_test() {
   speed_test_v6 'https://speedtesthn.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ha Noi, VN'
   speed_test_v6 'https://speedtestdng.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Da Nang, VN'
   speed_test_v6 'https://speedtest.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ho Chi Minh, VN'
-  speed_test_v6 'http://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
+  speed_test_v6 'https://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
   speed_test_v6 'https://hcmspeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ho Chi Minh, VN'
   speed_test_v6 'https://hn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ha Noi, VN'
   speed_test_v6 'https://dn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Da Nang, VN'
@@ -585,6 +596,22 @@ run_speed_test() {
   read -ra disk_size2 <<<"$(LANG=C df -hPl | grep -wvE '\-|none|tmpfs|devtmpfs|by-uuid|chroot|Filesystem' | awk '{print $3}')"
   disk_total_size=$(calculator_disk "${disk_size1[@]}")
   disk_used_size=$(calculator_disk "${disk_size2[@]}")
+
+  # Retrieve IP information from ip.nguyenanhung.com using curl
+  mkdir -p "$user_tmp_dir"
+  curl "https://ip.nguyenanhung.com/json" -s -o "$ip_info_tmp_file"
+
+  # Extract location information from the temporary file
+  local ip_city ip_region ip_region_name ip_country ip_country_code ip_isp ip_org ip_org_as
+  ip_city=$(jq -r '.city' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  ip_region=$(jq -r '.region' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  ip_region_name=$(jq -r '.regionName' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  ip_country=$(jq -r '.country' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  ip_country_code=$(jq -r '.countryCode' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  ip_isp=$(jq -r '.isp' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  ip_org=$(jq -r '.org' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  ip_org_as=$(jq -r '.as' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  # System Info
   message INFO "System Info"
   next
   message INFO "CPU model               : ${YELLOW}$cname${NC}"
@@ -607,6 +634,14 @@ run_speed_test() {
     message INFO "Server IPv6             : ❌ ${NC}OFFLINE"
   fi
   message INFO "Date                    : ${YELLOW}$date${NC}"
+  echo
+  message INFO "Network Information"
+  next
+  message INFO "ISP                     : ${YELLOW}${ip_isp}${NC}"
+  message INFO "ASN                     : ${YELLOW}${ip_org_as}${NC}"
+  message INFO "Host                    : ${YELLOW}${ip_org}${NC}"
+  message INFO "Location                : ${YELLOW}${ip_city}, ${ip_region}, ${ip_region_name}${NC}"
+  message INFO "Country                 : ${YELLOW}${ip_country}, ${ip_country_code}${NC}"
   echo
   message INFO "Disk Speed"
   next
@@ -635,4 +670,7 @@ run_speed_test | tee "$tmp"
 cat "$tmp" >>~/server-speedtest.log
 if [ -f "$tmp" ]; then
   rm -f "$tmp"
+fi
+if [ -f "$user_tmp_dir" ] && [[ "$user_tmp_dir" != "/tmp" ]]; then
+  rm -rf "$user_tmp_dir"
 fi
