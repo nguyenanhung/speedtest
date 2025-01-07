@@ -196,7 +196,34 @@ if [ ! -e '/usr/bin/wget' ] || [ ! -e '/usr/bin/fio' ] || [ ! -e '/usr/sbin/virt
     exit 1
   fi
 fi
-dnf install -y jq || apt install -y jq
+
+install_jq() {
+  if command -v jq &>/dev/null; then
+    echo "jq is already installed."
+    jq --version
+    return
+  fi
+
+  echo "jq is not installed. Installing now..."
+  if [ -f /etc/redhat-release ]; then
+    # RHEL-based systems
+    sudo yum install -y epel-release
+    sudo yum install -y jq
+  elif [ -f /etc/debian_version ]; then
+    # Debian-based systems
+    sudo apt update
+    sudo apt install -y jq
+  else
+    echo "Unsupported OS. Please install jq manually."
+    return 1
+  fi
+
+  echo "jq installation complete."
+  jq --version
+}
+
+# Call the function
+install_jq
 
 virtual_machine=$(virt-what | paste -sd' ')
 
