@@ -16,7 +16,6 @@ flock -n 200 || exit 1
 SECONDS=0
 
 # Get IP Information Temporary
-test_time_start=$(date "+%Y-%m-%d %H:%M:%S")
 test_time_exec=$(date +"%Y-%m-%d-%I-%M-%S-%p")
 user_home_dir=$(eval echo ~"${USER}")                           # Define the user's home directory
 user_tmp_dir="${user_home_dir}/tmp"                             # Define the temporary directory and file path
@@ -37,6 +36,9 @@ function catch_abort() {
   fi
   if [ -f "$ip_info_tmp_file" ]; then
     rm -f "$ip_info_tmp_file"
+  fi
+  if [ -e "$user_tmp_dir" ] && [[ "$user_tmp_dir" != "/tmp" ]]; then
+    rm -rf "$user_tmp_dir"
   fi
   exit 0
 }
@@ -627,16 +629,16 @@ run_speed_test() {
   message INFO "Kernel                  : ${YELLOW}$kern${NC}"
   message INFO "Virtualization          : ${YELLOW}${virt^^}${NC}"
   message INFO "Compatibility           : ${YELLOW}$os_compatibility${NC}"
+  message INFO "Date                    : ${YELLOW}$date${NC}"
+  echo
+  message INFO "Network Information"
+  next
   message INFO "Server Public IPv4      : √ ${YELLOW}$(fetch_public_ip)${NC}"
   if ipv6_is_supported; then
     message INFO "Server Public IPv6      : √ ${YELLOW}$(fetch_public_ipv6)${NC}"
   else
     message INFO "Server IPv6             : ❌ ${NC}OFFLINE"
   fi
-  message INFO "Date                    : ${YELLOW}$date${NC}"
-  echo
-  message INFO "Network Information"
-  next
   message INFO "ISP                     : ${YELLOW}${ip_isp}${NC}"
   message INFO "ASN                     : ${YELLOW}${ip_org_as}${NC}"
   message INFO "Host                    : ${YELLOW}${ip_org}${NC}"
@@ -671,6 +673,6 @@ cat "$tmp" >>~/server-speedtest.log
 if [ -f "$tmp" ]; then
   rm -f "$tmp"
 fi
-if [ -f "$user_tmp_dir" ] && [[ "$user_tmp_dir" != "/tmp" ]]; then
+if [ -e "$user_tmp_dir" ] && [[ "$user_tmp_dir" != "/tmp" ]]; then
   rm -rf "$user_tmp_dir"
 fi
