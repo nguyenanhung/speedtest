@@ -196,18 +196,7 @@ if [ ! -e '/usr/bin/wget' ] || [ ! -e '/usr/bin/fio' ] || [ ! -e '/usr/sbin/virt
     exit 1
   fi
 fi
-if ! command -v jq &>/dev/null; then
-  if [[ "$detected_os" == "debian" ]]; then
-    apt update
-    apt install -y jq >/dev/null 2>&1
-  elif [[ "$detected_os" == "rhel" ]]; then
-    dnf update
-    dnf install -y jq >/dev/null 2>&1
-  else
-    message INFO "OS Unsupported!"
-    exit 1
-  fi
-fi
+dnf install -y jq || apt install -y jq
 
 virtual_machine=$(virt-what | paste -sd' ')
 
