@@ -182,15 +182,15 @@ server_os_compatibility=$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2- | tr -
 os_compatibility="${server_os_compatibility^^}"
 message INFO "Detected OS: ${detected_os^^} - Compatible with: ${os_compatibility}"
 
-# install wget, fio and virt-what
-if [ ! -e '/usr/bin/wget' ] || [ ! -e '/usr/bin/fio' ] || [ ! -e '/usr/sbin/virt-what' ]; then
+# install wget, jq, fio and virt-what
+if [ ! -e '/usr/bin/wget' ] || [ ! -e '/usr/bin/fio' ] || [ ! -e '/usr/sbin/virt-what' ] || [ ! -e '/usr/sbin/jq' ]; then
   message INFO "Please wait..."
   if [[ "$detected_os" == "debian" ]]; then
     apt update
-    apt install -y wget fio virt-what >/dev/null 2>&1
+    apt install -y wget fio virt-what jq >/dev/null 2>&1
   elif [[ "$detected_os" == "rhel" ]]; then
     dnf update
-    dnf install -y wget fio virt-what >/dev/null 2>&1
+    dnf install -y wget fio virt-what jq >/dev/null 2>&1
   else
     message INFO "OS Unsupported!"
     exit 1
