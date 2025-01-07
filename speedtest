@@ -603,14 +603,14 @@ run_speed_test() {
 
   # Extract location information from the temporary file
   local ip_city ip_region ip_region_name ip_country ip_country_code ip_isp ip_org ip_org_as
-  ip_city=$(jq -r '.city' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
-  ip_region=$(jq -r '.region' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
-  ip_region_name=$(jq -r '.regionName' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
-  ip_country=$(jq -r '.country' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
-  ip_country_code=$(jq -r '.countryCode' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
-  ip_isp=$(jq -r '.isp' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
-  ip_org=$(jq -r '.org' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
-  ip_org_as=$(jq -r '.as' "$TELEGRAM_ALERT_SSH_TMP_FILE" | sed 's/"//g')
+  ip_city=$(jq -r '.city' "$ip_info_tmp_file" | sed 's/"//g')
+  ip_region=$(jq -r '.region' "$ip_info_tmp_file" | sed 's/"//g')
+  ip_region_name=$(jq -r '.regionName' "$ip_info_tmp_file" | sed 's/"//g')
+  ip_country=$(jq -r '.country' "$ip_info_tmp_file" | sed 's/"//g')
+  ip_country_code=$(jq -r '.countryCode' "$ip_info_tmp_file" | sed 's/"//g')
+  ip_isp=$(jq -r '.isp' "$ip_info_tmp_file" | sed 's/"//g')
+  ip_org=$(jq -r '.org' "$ip_info_tmp_file" | sed 's/"//g')
+  ip_org_as=$(jq -r '.as' "$ip_info_tmp_file" | sed 's/"//g')
   # System Info
   message INFO "System Info"
   next
