@@ -429,7 +429,7 @@ speed_ipv6_of_racknerd_test() {
   speed_test_v6 'https://lg-dub.racknerd.com/test_files/100MB.test' 'RackNerd, Dublin, IE, Europe'
 }
 speed_of_vietnam_telco_test() {
-  speed_test 'http://speedtest.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Ha Noi, VN'
+  speed_test 'https://speedtest2.vtn.com.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VNPT, Ha Noi, VN'
   speed_test 'https://speedtest3.vtn.com.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VNPT, Ho Chi Minh, VN'
   speed_test 'https://speedtest5.vtn.com.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VNPT, Da Nang, VN'
   speed_test 'https://speedtest7.vtn.com.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VNPT, Hai Phong, VN'
@@ -439,7 +439,7 @@ speed_of_vietnam_telco_test() {
   speed_test 'https://speedtesthn.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ha Noi, VN'
   speed_test 'https://speedtestdng.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Da Nang, VN'
   speed_test 'https://speedtest.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ho Chi Minh, VN'
-  speed_test 'https://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
+  speed_test 'http://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
   speed_test 'https://hcmspeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ho Chi Minh, VN'
   speed_test 'https://speedtest.vpsttt.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VPSTTT, Ha Noi, VN'
   speed_test 'https://hn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ha Noi, VN'
@@ -450,7 +450,7 @@ speed_of_vietnam_telco_test() {
   speed_test 'https://vhcm.vietpn.com.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VietPN, Ho Chi Minh, VN'
 }
 speed_ipv6_of_vietnam_telco_test() {
-  speed_test_v6 'http://speedtest.vtn.com.vn/speedtest/random4000x4000.jpg' 'VNPT, Ha Noi, VN'
+  speed_test_v6 'https://speedtest2.vtn.com.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VNPT, Ha Noi, VN'
   speed_test_v6 'https://speedtest3.vtn.com.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VNPT, Ho Chi Minh, VN'
   speed_test_v6 'https://speedtest5.vtn.com.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VNPT, Da Nang, VN'
   speed_test_v6 'https://speedtest7.vtn.com.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'VNPT, Hai Phong, VN'
@@ -461,7 +461,7 @@ speed_ipv6_of_vietnam_telco_test() {
   speed_test_v6 'https://speedtesthn.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ha Noi, VN'
   speed_test_v6 'https://speedtestdng.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Da Nang, VN'
   speed_test_v6 'https://speedtest.fpt.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'FPT, Ho Chi Minh, VN'
-  speed_test_v6 'https://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
+  speed_test_v6 'http://hnispeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ha Noi, VN'
   speed_test_v6 'https://hcmspeedtest.cmctelecom.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'CMC, Ho Chi Minh, VN'
   speed_test_v6 'https://hn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Ha Noi, VN'
   speed_test_v6 'https://dn1.mobifone.vn.prod.hosts.ooklaserver.net:8080/speedtest/random4000x4000.jpg' 'MobiFone, Da Nang, VN'
