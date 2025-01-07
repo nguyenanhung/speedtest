@@ -37,9 +37,6 @@ function catch_abort() {
   if [ -f "$ip_info_tmp_file" ]; then
     rm -f "$ip_info_tmp_file"
   fi
-  if [ -e "$user_tmp_dir" ] && [[ "$user_tmp_dir" != "/tmp" ]]; then
-    rm -rf "$user_tmp_dir"
-  fi
   exit 0
 }
 ##################################################################################
@@ -673,6 +670,6 @@ cat "$tmp" >>~/server-speedtest.log
 if [ -f "$tmp" ]; then
   rm -f "$tmp"
 fi
-if [ -e "$user_tmp_dir" ] && [[ "$user_tmp_dir" != "/tmp" ]]; then
-  rm -rf "$user_tmp_dir"
+if [ -f "$ip_info_tmp_file" ]; then
+  rm -f "$ip_info_tmp_file"
 fi
